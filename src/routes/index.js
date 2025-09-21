@@ -15,6 +15,8 @@ const authRoutes = require('./authentication');
 const writeRoutes = require('./write');
 const helpers = require('./helpers');
 
+const questionsRoutes = require('./questions');
+
 const { setupPageRoute } = helpers;
 
 const _mounts = {
@@ -157,7 +159,7 @@ function addCoreRoutes(app, router, middleware, mounts) {
 	_mounts.api(router, middleware, controllers);
 	_mounts.feed(router, middleware, controllers);
 
-	// Mount questions API routes here:
+	// Mount questions API routes
 	router.use('/api/questions', questionsRoutes);
 
 	_mounts.activitypub(router, middleware, controllers);
