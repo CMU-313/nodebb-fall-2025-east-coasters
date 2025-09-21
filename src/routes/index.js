@@ -9,6 +9,7 @@ const meta = require('../meta');
 const controllers = require('../controllers');
 const controllerHelpers = require('../controllers/helpers');
 const plugins = require('../plugins');
+const questionsRoutes = require('./questions');
 
 const authRoutes = require('./authentication');
 const writeRoutes = require('./write');
@@ -155,6 +156,9 @@ function addCoreRoutes(app, router, middleware, mounts) {
 	_mounts.meta(router, middleware, controllers);
 	_mounts.api(router, middleware, controllers);
 	_mounts.feed(router, middleware, controllers);
+
+	// Mount questions API routes here:
+	router.use('/api/questions', questionsRoutes);
 
 	_mounts.activitypub(router, middleware, controllers);
 	_mounts.main(router, middleware, controllers);
