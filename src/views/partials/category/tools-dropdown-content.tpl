@@ -31,6 +31,20 @@
 		</a>
 	</li>
 
+	<!-- Make both buttons visible for testing -->
+	<li>
+		<a component="topic/resolve" href="#" class="dropdown-item rounded-1 d-flex align-items-center gap-2" role="menuitem">
+			<i class="fa fa-fw fa-check text-success"></i> Mark as Resolved
+		</a>
+	</li>
+
+	<li>
+		<a component="topic/unresolve" href="#" class="dropdown-item rounded-1 d-flex align-items-center gap-2" role="menuitem">
+			<i class="fa fa-fw fa-times text-warning"></i> Mark as Unresolved
+		</a>
+	</li>
+
+
 	<li class="dropdown-divider"></li>
 
 	<li>
