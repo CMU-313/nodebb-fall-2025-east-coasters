@@ -147,3 +147,9 @@ SocketTopics.registerHandlers = function (socket) {
 		await topicsAPI.markUnresolved(socket, data);
 	});
 };
+
+// In the backend controller that renders the page
+res.render('topic', {
+	topic: topicData,
+	// ...other context variables...
+});

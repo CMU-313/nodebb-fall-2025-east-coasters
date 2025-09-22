@@ -313,4 +313,22 @@ module.exports = function (Topics) {
 			db.sortedSetAdd(set, timestamp, tid),
 		]);
 	};
+
+	topicTools.markResolved = async function (tid, uid) {
+		await db.setObjectField(`topic:${tid}`, 'resolved', true);
+		await Topics.events.log({
+			type: 'topic-resolved',
+			uid,
+			tid,
+		});
+	};
+
+	topicTools.markUnresolved = async function (tid, uid) {
+		await db.setObjectField(`topic:${tid}`, 'resolved', false);
+		await Topics.events.log({
+			type: 'topic-unresolved',
+			uid,
+			tid,
+		});
+	};
 };

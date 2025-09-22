@@ -297,6 +297,22 @@ topicsAPI.markUnread = async (caller, { tid }) => {
 	topics.pushUnreadCount(caller.uid);
 };
 
+topicsAPI.markResolved = async (caller, { tid }) => {
+	if (!tid || caller.uid <= 0) {
+		throw new Error('[[error:invalid-data]]');
+	}
+	await topics.tools.markResolved(tid, caller.uid);
+	topics.pushUnreadCount(caller.uid);
+};
+
+topicsAPI.markUnresolved = async (caller, { tid }) => {
+	if (!tid || caller.uid <= 0) {
+		throw new Error('[[error:invalid-data]]');
+	}
+	await topics.tools.markUnresolved(tid, caller.uid);
+	topics.pushUnreadCount(caller.uid);
+};
+
 topicsAPI.bump = async (caller, { tid }) => {
 	if (!tid) {
 		throw new Error('[[error:invalid-tid]]');
