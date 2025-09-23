@@ -56,6 +56,18 @@ define('forum/category/tools', [
 			return false;
 		});
 
+		 // Add resolve/unresolve handlers
+        components.get('topic/resolve').on('click', function () {
+            categoryCommand('put', '/resolve', 'resolve', onCommandComplete);
+            return false;
+        });
+
+        components.get('topic/unresolve').on('click', function () {
+            categoryCommand('del', '/resolve', 'unresolve', onCommandComplete);
+            return false;
+        });
+
+
 		// todo: should also use categoryCommand, but no write api call exists for this yet
 		components.get('topic/mark-unread-for-all').on('click', function () {
 			const tids = topicSelect.getSelectedTids();
@@ -137,6 +149,8 @@ define('forum/category/tools', [
 		socket.on('event:topic_pinned', setPinnedState);
 		socket.on('event:topic_unpinned', setPinnedState);
 		socket.on('event:topic_moved', onTopicMoved);
+		socket.on('event:topic_resolved', setResolvedState);
+		socket.on('event:topic_unresolved', setResolvedState);
 	};
 
 	function categoryCommand(method, path, command, onComplete) {
@@ -183,6 +197,8 @@ define('forum/category/tools', [
 		socket.removeListener('event:topic_pinned', setPinnedState);
 		socket.removeListener('event:topic_unpinned', setPinnedState);
 		socket.removeListener('event:topic_moved', onTopicMoved);
+		socket.removeListener('event:topic_resolved', setResolvedState);
+		socket.removeListener('event:topic_unresolved', setResolvedState);
 	};
 
 	function closeDropDown() {
@@ -213,6 +229,7 @@ define('forum/category/tools', [
 		const isAnyLocked = isAny(isTopicLocked, tids);
 		const isAnyScheduled = isAny(isTopicScheduled, tids);
 		const areAllScheduled = areAll(isTopicScheduled, tids);
+		const isAnyResolved = isAny(isTopicResolved, tids);
 
 		components.get('topic/delete').toggleClass('hidden', isAnyDeleted);
 		components.get('topic/restore').toggleClass('hidden', isAnyScheduled || !isAnyDeleted);
@@ -224,8 +241,25 @@ define('forum/category/tools', [
 		components.get('topic/pin').toggleClass('hidden', areAllScheduled || isAnyPinned);
 		components.get('topic/unpin').toggleClass('hidden', areAllScheduled || !isAnyPinned);
 
+		components.get('topic/resolve').toggleClass('hidden', isAnyResolved);
+		components.get('topic/unresolve').toggleClass('hidden', !isAnyResolved);
+
 		components.get('topic/merge').toggleClass('hidden', isAnyScheduled);
+		
 	}
+
+	function isTopicScheduled(tid) {
+        return getTopicEl(tid).hasClass('scheduled');
+    }
+
+    function isTopicResolved(tid) {
+        return getTopicEl(tid).hasClass('resolved');
+    }
+
+    function getTopicEl(tid) {
+        return components.get('category/topic', 'tid', tid);
+    }
+
 
 	function isAny(method, tids) {
 		for (let i = 0; i < tids.length; i += 1) {
@@ -283,6 +317,12 @@ define('forum/category/tools', [
 		topic.toggleClass('locked', data.isLocked);
 		topic.find('[component="topic/locked"]').toggleClass('hidden', !data.isLocked);
 	}
+
+	function setResolvedState(data) {
+        const topic = getTopicEl(data.tid);
+        topic.toggleClass('resolved', data.isResolved);
+        topic.find('[component="topic/resolved"]').toggleClass('hidden', !data.isResolved);
+    }
 
 	function onTopicMoved(data) {
 		getTopicEl(data.tid).remove();
