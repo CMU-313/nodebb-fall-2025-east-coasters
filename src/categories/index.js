@@ -457,7 +457,7 @@ Categories.setCourseTag = async function (cid, course) {
 	// or schema ahead of time. They are just created dynamically on first use 
 	await db.sortedSetAdd(`course:${course}:categories`, 0, cid);
 
-    await db.setObjectField(`category:${cid}`, 'course', course);
+	await db.setObjectField(`category:${cid}`, 'course', course);
 };
 
 // get all category cids for a course
