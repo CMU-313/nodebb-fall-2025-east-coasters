@@ -57,15 +57,16 @@ define('forum/category/tools', [
 		});
 
 		 // Add resolve/unresolve handlers
-        components.get('topic/resolve').on('click', function () {
-            categoryCommand('put', '/resolve', 'resolve', onCommandComplete);
-            return false;
-        });
+		components.get('topic/resolve').on('click', function () {
+			categoryCommand('put', '/resolve', 'resolve', onCommandComplete);
+			return false;
+		});
 
-        components.get('topic/unresolve').on('click', function () {
-            categoryCommand('del', '/resolve', 'unresolve', onCommandComplete);
-            return false;
-        });
+
+		components.get('topic/unresolve').on('click', function () {
+			categoryCommand('del', '/resolve', 'unresolve', onCommandComplete);
+			return false;
+		});
 
 
 		// todo: should also use categoryCommand, but no write api call exists for this yet
@@ -249,16 +250,16 @@ define('forum/category/tools', [
 	}
 
 	function isTopicScheduled(tid) {
-        return getTopicEl(tid).hasClass('scheduled');
-    }
+		return getTopicEl(tid).hasClass('scheduled');
+	}
 
-    function isTopicResolved(tid) {
-        return getTopicEl(tid).hasClass('resolved');
-    }
+	function isTopicResolved(tid) {
+		return getTopicEl(tid).hasClass('resolved');
+	}
 
-    function getTopicEl(tid) {
-        return components.get('category/topic', 'tid', tid);
-    }
+	function getTopicEl(tid) {
+		return components.get('category/topic', 'tid', tid);
+	}
 
 
 	function isAny(method, tids) {
@@ -291,14 +292,6 @@ define('forum/category/tools', [
 		return getTopicEl(tid).hasClass('pinned');
 	}
 
-	function isTopicScheduled(tid) {
-		return getTopicEl(tid).hasClass('scheduled');
-	}
-
-	function getTopicEl(tid) {
-		return components.get('category/topic', 'tid', tid);
-	}
-
 	function setDeleteState(data) {
 		const topic = getTopicEl(data.tid);
 		topic.toggleClass('deleted', data.isDeleted);
@@ -319,10 +312,10 @@ define('forum/category/tools', [
 	}
 
 	function setResolvedState(data) {
-        const topic = getTopicEl(data.tid);
-        topic.toggleClass('resolved', data.isResolved);
-        topic.find('[component="topic/resolved"]').toggleClass('hidden', !data.isResolved);
-    }
+		const topic = getTopicEl(data.tid);
+		topic.toggleClass('resolved', data.isResolved);
+		topic.find('[component="topic/resolved"]').toggleClass('hidden', !data.isResolved);
+	}
 
 	function onTopicMoved(data) {
 		getTopicEl(data.tid).remove();
