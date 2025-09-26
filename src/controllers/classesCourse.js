@@ -1,12 +1,13 @@
 'use strict';
 
 const categories = require('../categories');
-const meta = require('../meta');
 const privileges = require('../privileges');
 
 // Controller for /classes/:course route
+
 module.exports = async function (req, res, next) {
-	const course = req.params.course;
+	const { course } = req.params;
+	
 	if (!course) {
 		return res.status(400).render('500', { error: 'Course not specified.' });
 	}
