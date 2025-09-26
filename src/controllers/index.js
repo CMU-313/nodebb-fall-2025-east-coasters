@@ -1,231 +1,378 @@
 'use strict';
 
 const nconf = require('nconf');
-const winston = require('winston');
-const path = require('path');
-const express = require('express');
+const validator = require('validator');
 
 const meta = require('../meta');
-const controllers = require('../controllers');
-const controllerHelpers = require('../controllers/helpers');
+const user = require('../user');
 const plugins = require('../plugins');
-
-const authRoutes = require('./authentication');
-const writeRoutes = require('./write');
+const privilegesHelpers = require('../privileges/helpers');
 const helpers = require('./helpers');
 
-const { setupPageRoute } = helpers;
+const Controllers = module.exports;
 
-const _mounts = {
-	user: require('./user'),
-	meta: require('./meta'),
-	api: require('./api'),
-	admin: require('./admin'),
-	feed: require('./feeds'),
-	'well-known': require('./well-known'),
-	activitypub: require('./activitypub'),
-};
+Controllers.ping = require('./ping');
+Controllers['well-known'] = require('./well-known');
+Controllers.activitypub = require('./activitypub');
+Controllers.home = require('./home');
+Controllers.topics = require('./topics');
+Controllers.posts = require('./posts');
+Controllers.categories = require('./categories');
+Controllers.category = require('./category');
+Controllers.unread = require('./unread');
+Controllers.recent = require('./recent');
+Controllers.popular = require('./popular');
+Controllers.top = require('./top');
+Controllers.tags = require('./tags');
+Controllers.search = require('./search');
+Controllers.user = require('./user');
+Controllers.users = require('./users');
+Controllers.groups = require('./groups');
+Controllers.accounts = require('./accounts');
+Controllers.authentication = require('./authentication');
+Controllers.api = require('./api');
+Controllers.admin = require('./admin');
+Controllers.globalMods = require('./globalmods');
+Controllers.mods = require('./mods');
+Controllers.sitemap = require('./sitemap');
+Controllers.osd = require('./osd');
+Controllers['service-worker'] = require('./service-worker');
+Controllers['404'] = require('./404');
+Controllers.errors = require('./errors');
+Controllers.composer = require('./composer');
 
-_mounts.main = (app, middleware, controllers) => {
-	const loginRegisterMiddleware = [middleware.redirectToAccountIfLoggedIn];
+Controllers.write = require('./write');
 
-	// Add /classes route for landing page
-	setupPageRoute(app, '/classes', [], controllers.classes);
-	// Add /classes/:course route for course-specific categories
-	setupPageRoute(app, '/classes/:course', [], controllers.classesCourse);
-
-	setupPageRoute(app, '/login', loginRegisterMiddleware, controllers.login);
-	setupPageRoute(app, '/register', loginRegisterMiddleware, controllers.register);
-	setupPageRoute(app, '/register/complete', [], controllers.registerInterstitial);
-	setupPageRoute(app, '/compose', [], controllers.composer.get);
-	setupPageRoute(app, '/confirm/:code', [], controllers.confirmEmail);
-	setupPageRoute(app, '/outgoing', [], controllers.outgoing);
-	setupPageRoute(app, '/search', [], controllers.search.search);
-	setupPageRoute(app, '/reset/:code?', [middleware.delayLoading], controllers.reset);
-	setupPageRoute(app, '/tos', [], controllers.termsOfUse);
-
-	setupPageRoute(app, '/email/unsubscribe/:token', [], controllers.accounts.settings.unsubscribe);
-	app.post('/email/unsubscribe/:token', controllers.accounts.settings.unsubscribePost);
-
-	app.post('/compose', middleware.applyCSRF, controllers.composer.post);
-};
-
-_mounts.mod = (app, middleware, controllers) => {
-	setupPageRoute(app, '/flags', [], controllers.mods.flags.list);
-	setupPageRoute(app, '/flags/:flagId', [], controllers.mods.flags.detail);
-	setupPageRoute(app, '/post-queue/:id?', [], controllers.mods.postQueue);
-};
-
-_mounts.globalMod = (app, middleware, controllers) => {
-	setupPageRoute(app, '/ip-blacklist', [], controllers.globalMods.ipBlacklist);
-	setupPageRoute(app, '/registration-queue', [], controllers.globalMods.registrationQueue);
-};
-
-_mounts.topic = (app, name, middleware, controllers) => {
-	setupPageRoute(app, `/${name}/:topic_id/:slug/:post_index?`, [], controllers.topics.get);
-	setupPageRoute(app, `/${name}/:topic_id/:slug?`, [], controllers.topics.get);
-};
-
-_mounts.post = (app, name, middleware, controllers) => {
-	const middlewares = [
-		middleware.maintenanceMode,
-		middleware.authenticateRequest,
-		middleware.registrationComplete,
-		middleware.pluginHooks,
-	];
-	app.get(`/${name}/:pid`, middleware.busyCheck, middlewares, helpers.tryRoute(controllers.posts.redirectToPost));
-	app.get(`/api/${name}/:pid`, middlewares, helpers.tryRoute(controllers.posts.redirectToPost));
-};
-
-_mounts.tags = (app, name, middleware, controllers) => {
-	setupPageRoute(app, `/${name}/:tag`, [middleware.privateTagListing], controllers.tags.getTag);
-	setupPageRoute(app, `/${name}`, [middleware.privateTagListing], controllers.tags.getTags);
-};
-_mounts.categories = (app, name, middleware, controllers) => {
-	setupPageRoute(app, '/categories', [], controllers.categories.list);
-	setupPageRoute(app, '/popular', [], controllers.popular.get);
-	setupPageRoute(app, '/recent', [], controllers.recent.get);
-	setupPageRoute(app, '/top', [], controllers.top.get);
-	setupPageRoute(app, '/unread', [middleware.ensureLoggedIn], controllers.unread.get);
-};
-
-_mounts.category = (app, name, middleware, controllers) => {
-	setupPageRoute(app, `/${name}/:category_id/:slug/:topic_index`, [], controllers.category.get);
-	setupPageRoute(app, `/${name}/:category_id/:slug?`, [], controllers.category.get);
-};
-
-_mounts.users = (app, name, middleware, controllers) => {
-	const middlewares = [middleware.canViewUsers];
-
-	setupPageRoute(app, `/${name}`, middlewares, controllers.users.index);
-};
-
-_mounts.groups = (app, name, middleware, controllers) => {
-	const middlewares = [middleware.canViewGroups];
-
-	setupPageRoute(app, `/${name}`, middlewares, controllers.groups.list);
-	setupPageRoute(app, `/${name}/:slug`, middlewares, controllers.groups.details);
-	setupPageRoute(app, `/${name}/:slug/members`, middlewares, controllers.groups.members);
-};
-
-module.exports = async function (app, middleware) {
-	const router = express.Router();
-	router.render = function (...args) {
-		app.render(...args);
-	};
-
-	// Allow plugins/themes to mount some routes elsewhere
-	const remountable = ['admin', 'categories', 'category', 'topic', 'post', 'users', 'user', 'groups', 'tags'];
-	const { mounts } = await plugins.hooks.fire('filter:router.add', {
-		mounts: remountable.reduce((memo, mount) => {
-			memo[mount] = mount;
-			return memo;
-		}, {}),
-	});
-	// Guard against plugins sending back missing/extra mounts
-	Object.keys(mounts).forEach((mount) => {
-		if (!remountable.includes(mount)) {
-			delete mounts[mount];
-		} else if (typeof mount !== 'string') {
-			mounts[mount] = mount;
-		}
-	});
-	remountable.forEach((mount) => {
-		if (!mounts.hasOwnProperty(mount)) {
-			mounts[mount] = mount;
-		}
-	});
-
-	router.all('(/+api|/+api/*?)', middleware.prepareAPI);
-	router.all(`(/+api/admin|/+api/admin/*?${mounts.admin !== 'admin' ? `|/+api/${mounts.admin}|/+api/${mounts.admin}/*?` : ''})`, middleware.authenticateRequest, middleware.ensureLoggedIn, middleware.admin.checkPrivileges);
-	router.all(`(/+admin|/+admin/*?${mounts.admin !== 'admin' ? `|/+${mounts.admin}|/+${mounts.admin}/*?` : ''})`, middleware.ensureLoggedIn, middleware.applyCSRF, middleware.admin.checkPrivileges);
-
-	app.use(middleware.stripLeadingSlashes);
-
-	// handle custom homepage routes
-	router.use('/', controllers.home.rewrite);
-
-	// homepage handled by `action:homepage.get:[route]`
-	setupPageRoute(router, '/', [], controllers.home.pluginHook);
-
-	await plugins.reloadRoutes({ router: router });
-	await authRoutes.reloadRoutes({ router: router });
-	await writeRoutes.reload({ router: router });
-	addCoreRoutes(app, router, middleware, mounts);
-
-	winston.info('[router] Routes added');
-};
-
-function addCoreRoutes(app, router, middleware, mounts) {
-	_mounts.meta(router, middleware, controllers);
-	_mounts.api(router, middleware, controllers);
-	_mounts.feed(router, middleware, controllers);
-
-	_mounts.activitypub(router, middleware, controllers);
-	_mounts.main(router, middleware, controllers);
-	_mounts.mod(router, middleware, controllers);
-	_mounts.globalMod(router, middleware, controllers);
-	_mounts['well-known'](router, middleware, controllers);
-
-	addRemountableRoutes(app, router, middleware, mounts);
-
-	const relativePath = nconf.get('relative_path');
-	app.use(relativePath || '/', router);
-
-	if (process.env.NODE_ENV === 'development') {
-		require('./debug')(app, middleware, controllers);
+Controllers.reset = async function (req, res) {
+	if (meta.config['password:disableEdit']) {
+		return helpers.notAllowed(req, res);
 	}
 
-	app.use(middleware.privateUploads);
-
-	const statics = [
-		{ route: '/assets', path: path.join(__dirname, '../../build/public') },
-		{ route: '/assets', path: path.join(__dirname, '../../public') },
-	];
-	const staticOptions = {
-		maxAge: app.enabled('cache') ? 5184000000 : 0,
+	res.locals.metaTags = {
+		...res.locals.metaTags,
+		name: 'robots',
+		content: 'noindex',
 	};
 
-	if (path.resolve(__dirname, '../../public/uploads') !== nconf.get('upload_path')) {
-		statics.unshift({ route: '/assets/uploads', path: nconf.get('upload_path') });
+	const renderReset = function (code, valid) {
+		res.render('reset_code', {
+			valid: valid,
+			displayExpiryNotice: req.session.passwordExpired,
+			code: code,
+			minimumPasswordLength: meta.config.minimumPasswordLength,
+			minimumPasswordStrength: meta.config.minimumPasswordStrength,
+			breadcrumbs: helpers.buildBreadcrumbs([
+				{
+					text: '[[reset_password:reset-password]]',
+					url: '/reset',
+				},
+				{
+					text: '[[reset_password:update-password]]',
+				},
+			]),
+			title: '[[pages:reset]]',
+		});
+		delete req.session.passwordExpired;
+	};
+
+	if (req.params.code) {
+		req.session.reset_code = req.params.code;
 	}
 
-	statics.forEach((obj) => {
-		app.use(relativePath + obj.route, middleware.addUploadHeaders, express.static(obj.path, staticOptions));
-	});
-	app.use(`${relativePath}/uploads`, (req, res) => {
-		res.redirect(`${relativePath}/assets/uploads${req.path}?${meta.config['cache-buster']}`);
-	});
-	app.use(`${relativePath}/plugins`, (req, res) => {
-		res.redirect(`${relativePath}/assets/plugins${req.path}${req._parsedUrl.search || ''}`);
-	});
+	if (req.session.reset_code) {
+		// Validate and save to local variable before removing from session
+		const valid = await user.reset.validate(req.session.reset_code);
+		renderReset(req.session.reset_code, valid);
+		delete req.session.reset_code;
+	} else {
+		res.render('reset', {
+			code: null,
+			breadcrumbs: helpers.buildBreadcrumbs([{
+				text: '[[reset_password:reset-password]]',
+			}]),
+			title: '[[pages:reset]]',
+		});
+	}
+};
 
-	app.use(`${relativePath}/assets/client-*.css`, middleware.buildSkinAsset);
-	app.use(`${relativePath}/assets/client-*-rtl.css`, middleware.buildSkinAsset);
+Controllers.login = async function (req, res) {
+	const data = { loginFormEntry: [] };
+	const loginStrategies = require('../routes/authentication').getLoginStrategies();
+	const registrationType = meta.config.registrationType || 'normal';
+	const allowLoginWith = (meta.config.allowLoginWith || 'username-email');
 
-	app.use(controllers['404'].handle404);
-	app.use(controllers.errors.handleURIErrors);
-	app.use(controllers.errors.handleErrors);
-}
+	let errorText;
+	if (req.query.error === 'csrf-invalid') {
+		errorText = '[[error:csrf-invalid]]';
+	} else if (req.query.error) {
+		errorText = validator.escape(String(req.query.error));
+	}
 
-function addRemountableRoutes(app, router, middleware, mounts) {
-	Object.keys(mounts).map(async (mount) => {
-		const original = mount;
-		mount = mounts[original];
+	if (req.headers['x-return-to']) {
+		req.session.returnTo = req.headers['x-return-to'];
+	}
 
-		if (!mount) { // do not mount at all
-			winston.warn(`[router] Not mounting /${original}`);
+	// Occasionally, x-return-to is passed a full url.
+	req.session.returnTo = req.session.returnTo && req.session.returnTo.replace(nconf.get('base_url'), '').replace(nconf.get('relative_path'), '');
+
+	data.alternate_logins = loginStrategies.length > 0;
+	data.authentication = loginStrategies;
+	data.allowRegistration = registrationType === 'normal';
+	data.allowLoginWith = `[[login:${allowLoginWith}]]`;
+	data.breadcrumbs = helpers.buildBreadcrumbs([{
+		text: '[[global:login]]',
+	}]);
+	data.error = req.flash('error')[0] || errorText;
+	data.title = '[[pages:login]]';
+	data.allowPasswordReset = !meta.config['password:disableEdit'];
+
+	const loginPrivileges = await privilegesHelpers.getGroupPrivileges(0, ['groups:local:login']);
+	const hasLoginPrivilege = !!loginPrivileges.find(privilege => privilege.privileges['groups:local:login']);
+	data.allowLocalLogin = hasLoginPrivilege || parseInt(req.query.local, 10) === 1;
+
+	if (!data.allowLocalLogin && !data.allowRegistration && data.alternate_logins && data.authentication.length === 1) {
+		return helpers.redirect(res, { external: data.authentication[0].url });
+	}
+
+	// Re-auth challenge, pre-fill username
+	if (req.loggedIn) {
+		const userData = await user.getUserFields(req.uid, ['username']);
+		data.username = userData.username;
+		data.alternate_logins = false;
+	}
+	res.render('login', data);
+};
+
+Controllers.register = async function (req, res, next) {
+	const registrationType = meta.config.registrationType || 'normal';
+
+	if (registrationType === 'disabled') {
+		return setImmediate(next);
+	}
+
+	let errorText;
+	const returnTo = (req.headers['x-return-to'] || '').replace(nconf.get('base_url') + nconf.get('relative_path'), '');
+	if (req.query.error === 'csrf-invalid') {
+		errorText = '[[error:csrf-invalid]]';
+	}
+	try {
+		if (registrationType === 'invite-only' || registrationType === 'admin-invite-only') {
+			try {
+				await user.verifyInvitation(req.query);
+			} catch (e) {
+				return res.render('400', {
+					error: e.message,
+				});
+			}
+		}
+
+		if (returnTo) {
+			req.session.returnTo = returnTo;
+		}
+
+		const loginStrategies = require('../routes/authentication').getLoginStrategies();
+		res.render('register', {
+			'register_window:spansize': loginStrategies.length ? 'col-md-6' : 'col-md-12',
+			alternate_logins: !!loginStrategies.length,
+			authentication: loginStrategies,
+
+			minimumUsernameLength: meta.config.minimumUsernameLength,
+			maximumUsernameLength: meta.config.maximumUsernameLength,
+			minimumPasswordLength: meta.config.minimumPasswordLength,
+			minimumPasswordStrength: meta.config.minimumPasswordStrength,
+			breadcrumbs: helpers.buildBreadcrumbs([{
+				text: '[[register:register]]',
+			}]),
+			regFormEntry: [],
+			error: req.flash('error')[0] || errorText,
+			title: '[[pages:register]]',
+		});
+	} catch (err) {
+		next(err);
+	}
+};
+
+Controllers.registerInterstitial = async function (req, res, next) {
+	if (!req.session.hasOwnProperty('registration')) {
+		return res.redirect(`${nconf.get('relative_path')}/register`);
+	}
+	try {
+		const data = await user.interstitials.get(req, req.session.registration);
+
+		if (!data.interstitials.length) {
+			// No interstitials, redirect to home
+			const returnTo = req.session.returnTo || req.session.registration.returnTo;
+			delete req.session.registration;
+			return helpers.redirect(res, returnTo || '/');
+		}
+
+		const errors = req.flash('errors');
+		const renders = data.interstitials.map(
+			interstitial => req.app.renderAsync(interstitial.template, { ...interstitial.data || {}, errors })
+		);
+		const sections = await Promise.all(renders);
+
+		res.render('registerComplete', {
+			title: '[[pages:registration-complete]]',
+			register: data.userData.register,
+			sections,
+			errors,
+		});
+	} catch (err) {
+		next(err);
+	}
+};
+
+Controllers.confirmEmail = async (req, res) => {
+	function renderPage(opts = {}) {
+		res.render('confirm', {
+			title: '[[pages:confirm]]',
+			...opts,
+		});
+	}
+
+	if (req.method === 'HEAD') {
+		return renderPage();
+	}
+	try {
+		await user.email.confirmByCode(req.params.code, req.session.id);
+		if (req.session.registration) {
+			// After confirmation, no need to send user back to email change form
+			delete req.session.registration.updateEmail;
+		}
+
+		renderPage();
+	} catch (e) {
+		if (e.message === '[[error:invalid-data]]' || e.message === '[[error:confirm-email-expired]]') {
+			renderPage({ error: true });
 			return;
 		}
 
-		if (mount !== original) {
-			// Set up redirect for fallback handling (some js/tpls may still refer to the traditional mount point)
-			winston.info(`[router] /${original} prefix re-mounted to /${mount}. Requests to /${original}/* will now redirect to /${mount}`);
-			router.use(new RegExp(`/(api/)?${original}`), (req, res) => {
-				controllerHelpers.redirect(res, `${nconf.get('relative_path')}/${mount}${req.path}`);
-			});
-		}
+		throw e;
+	}
+};
 
-		_mounts[original](router, mount, middleware, controllers);
+Controllers.robots = function (req, res) {
+	res.set('Content-Type', 'text/plain');
+
+	if (meta.config['robots:txt']) {
+		res.send(meta.config['robots:txt']);
+	} else {
+		res.send(`${'User-agent: *\n' +
+			'Disallow: '}${nconf.get('relative_path')}/admin/\n` +
+			`Disallow: ${nconf.get('relative_path')}/reset/\n` +
+			`Disallow: ${nconf.get('relative_path')}/compose\n` +
+			`Sitemap: ${nconf.get('url')}/sitemap.xml`);
+	}
+};
+
+Controllers.manifest = async function (req, res) {
+	const manifest = {
+		name: meta.config.title || 'NodeBB',
+		short_name: meta.config['title:short'] || meta.config.title || 'NodeBB',
+		start_url: nconf.get('url'),
+		display: 'standalone',
+		orientation: 'portrait',
+		theme_color: meta.config.themeColor || '#ffffff',
+		background_color: meta.config.backgroundColor || '#ffffff',
+		icons: [],
+	};
+
+	if (meta.config['brand:touchIcon']) {
+		manifest.icons.push({
+			src: `${nconf.get('relative_path')}/assets/uploads/system/touchicon-36.png`,
+			sizes: '36x36',
+			type: 'image/png',
+			density: 0.75,
+		}, {
+			src: `${nconf.get('relative_path')}/assets/uploads/system/touchicon-48.png`,
+			sizes: '48x48',
+			type: 'image/png',
+			density: 1.0,
+		}, {
+			src: `${nconf.get('relative_path')}/assets/uploads/system/touchicon-72.png`,
+			sizes: '72x72',
+			type: 'image/png',
+			density: 1.5,
+		}, {
+			src: `${nconf.get('relative_path')}/assets/uploads/system/touchicon-96.png`,
+			sizes: '96x96',
+			type: 'image/png',
+			density: 2.0,
+		}, {
+			src: `${nconf.get('relative_path')}/assets/uploads/system/touchicon-144.png`,
+			sizes: '144x144',
+			type: 'image/png',
+			density: 3.0,
+		}, {
+			src: `${nconf.get('relative_path')}/assets/uploads/system/touchicon-192.png`,
+			sizes: '192x192',
+			type: 'image/png',
+			density: 4.0,
+		}, {
+			src: `${nconf.get('relative_path')}/assets/uploads/system/touchicon-512.png`,
+			sizes: '512x512',
+			type: 'image/png',
+			density: 10.0,
+		});
+	}
+
+
+	if (meta.config['brand:maskableIcon']) {
+		manifest.icons.push({
+			src: `${nconf.get('relative_path')}/assets/uploads/system/maskableicon-orig.png`,
+			sizes: '512x512',
+			type: 'image/png',
+			purpose: 'maskable',
+		});
+	} else if (meta.config['brand:touchIcon']) {
+		manifest.icons.push({
+			src: `${nconf.get('relative_path')}/assets/uploads/system/touchicon-orig.png`,
+			sizes: '512x512',
+			type: 'image/png',
+			purpose: 'maskable',
+		});
+	}
+
+	const data = await plugins.hooks.fire('filter:manifest.build', {
+		req: req,
+		res: res,
+		manifest: manifest,
 	});
-}
+	res.status(200).json(data.manifest);
+};
+
+Controllers.outgoing = function (req, res, next) {
+	const url = req.query.url || '';
+	const allowedProtocols = [
+		'http', 'https', 'ftp', 'ftps', 'mailto', 'news', 'irc', 'gopher',
+		'nntp', 'feed', 'telnet', 'mms', 'rtsp', 'svn', 'tel', 'fax', 'xmpp', 'webcal',
+	];
+	const parsed = require('url').parse(url);
+
+	if (!url || !parsed.protocol || !allowedProtocols.includes(parsed.protocol.slice(0, -1))) {
+		return next();
+	}
+
+	res.render('outgoing', {
+		outgoing: validator.escape(String(url)),
+		title: meta.config.title,
+		breadcrumbs: helpers.buildBreadcrumbs([{
+			text: '[[notifications:outgoing-link]]',
+		}]),
+	});
+};
+
+Controllers.termsOfUse = async function (req, res, next) {
+	if (!meta.config.termsOfUse) {
+		return next();
+	}
+	const termsOfUse = await plugins.hooks.fire('filter:parse.post', {
+		postData: {
+			content: meta.config.termsOfUse || '',
+		},
+	});
+	res.render('tos', {
+		termsOfUse: termsOfUse.postData.content,
+	});
+};
