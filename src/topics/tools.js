@@ -314,21 +314,17 @@ module.exports = function (Topics) {
 		]);
 	};
 
-	topicTools.markResolved = async function (tid, uid) {
-		await db.setObjectField(`topic:${tid}`, 'resolved', true);
-		await Topics.events.log({
-			type: 'topic-resolved',
-			uid,
-			tid,
-		});
+	topicTools.resolve = async function (tid, uid) {
+		console.log(`[topicTools.resolve] Called for tid=${tid}, uid=${uid}`);
+		await db.setObjectField(`topic:${tid}`, 'resolved', 1);
+		console.log(`[topicTools.resolve] Set topic:${tid} resolved=1`);
+		return { tid, resolved: true };
 	};
 
-	topicTools.markUnresolved = async function (tid, uid) {
-		await db.setObjectField(`topic:${tid}`, 'resolved', false);
-		await Topics.events.log({
-			type: 'topic-unresolved',
-			uid,
-			tid,
-		});
+	topicTools.unresolve = async function (tid, uid) {
+		console.log(`[topicTools.unresolve] Called for tid=${tid}, uid=${uid}`);
+		await db.setObjectField(`topic:${tid}`, 'resolved', 0);
+		console.log(`[topicTools.unresolve] Set topic:${tid} resolved=0`);
+		return { tid, resolved: false };
 	};
 };
