@@ -56,7 +56,7 @@ define('forum/category/tools', [
 			return false;
 		});
 
-		 // Add resolve/unresolve handlers
+		// Add resolve/unresolve handlers
 		components.get('topic/resolve').on('click', function () {
 			categoryCommand('put', '/resolve', 'resolve', onCommandComplete);
 			return false;
