@@ -12,6 +12,8 @@ Categories.setCourseTag = async function (cid, course) {
 	// Unlike sql dbs, nosql like redis don't need initializing keys
 	// or schema ahead of time. They are just created dynamically on first use 
 	await db.sortedSetAdd(`course:${course}:categories`, 0, cid);
+
+    await db.setObjectField(`category:${cid}`, 'course', course);
 };
 
 // get all category cids for a course
@@ -19,6 +21,22 @@ Categories.getCidsByCourse = async function (course) {
 	if (!course) return [];
 	const cids = await db.getSortedSetRange(`course:${course}:categories`, 0, -1);
 	return cids.map(cid => parseInt(cid, 10));
+};
+
+// remove course tag mapping for a category
+Categories.removeCourseTag = async function (cid, course) {
+	if (!course) return;
+	// remove cid from course set
+	await db.sortedSetRemove(`course:${course}:categories`, cid);
+	// remove course from category tags array if present
+	let tags = await db.getObjectField(`category:${cid}`, 'tags');
+	tags = Array.isArray(tags) ? tags : (tags ? [tags] : []);
+	if (tags.includes(course)) {
+		const filtered = tags.filter(t => t !== course);
+		await db.setObjectField(`category:${cid}`, 'tags', filtered);
+	}
+	// remove persisted course field
+	await db.delete(`category:${cid}:course`);
 };
 
 'use strict';
