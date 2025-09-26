@@ -41,6 +41,10 @@ Controllers['404'] = require('./404');
 Controllers.errors = require('./errors');
 Controllers.composer = require('./composer');
 
+// Classes controllers (courses UI)
+Controllers.classes = require('./classes');
+Controllers.classesCourse = require('./classesCourse');
+
 Controllers.write = require('./write');
 
 Controllers.reset = async function (req, res) {
