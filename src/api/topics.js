@@ -297,6 +297,22 @@ topicsAPI.markUnread = async (caller, { tid }) => {
 	topics.pushUnreadCount(caller.uid);
 };
 
+topicsAPI.resolve = async function (caller, data) {
+	if (!data.tid || !caller.uid) {
+		console.log('In topics.js error case');
+		throw new Error('[[error:invalid-data]]');
+	}
+	console.log('In topics.js success case');
+	return await topics.tools.resolve(data.tid, caller.uid);
+};
+
+topicsAPI.unresolve = async function (caller, data) {
+	if (!data.tid || !caller.uid) {
+		throw new Error('[[error:invalid-data]]');
+	}
+	return await topics.tools.unresolve(data.tid, caller.uid);
+};
+
 topicsAPI.bump = async (caller, { tid }) => {
 	if (!tid) {
 		throw new Error('[[error:invalid-tid]]');

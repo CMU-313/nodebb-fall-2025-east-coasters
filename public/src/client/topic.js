@@ -480,6 +480,30 @@ define('forum/topic', [
 		}
 	}
 
+	$(document).ready(() => {
+		$(document).on('click', '[component="topic/mark-resolved"]', async function (e) {
+			e.preventDefault();
+			const tid = $(this).attr('data-tid');
+			try {
+				await socket.emit('topics.markResolved', { tid });
+				app.alertSuccess('[[topic:marked-resolved]]');
+			} catch (err) {
+				app.alertError(err.message);
+			}
+		});
+
+		$(document).on('click', '[component="topic/mark-unresolved"]', async function (e) {
+			e.preventDefault();
+			const tid = $(this).attr('data-tid');
+			try {
+				await socket.emit('topics.markUnresolved', { tid });
+				app.alertSuccess('[[topic:marked-unresolved]]');
+			} catch (err) {
+				app.alertError(err.message);
+			}
+		});
+	});
+
 
 	return Topic;
 });

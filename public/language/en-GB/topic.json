@@ -254,5 +254,10 @@
 	"thumb-image": "Topic thumbnail image",
 
 	"announcers": "Shares",
-	"announcers-x": "Shares (%1)"
+	"announcers-x": "Shares (%1)",
+
+	"mark-resolved": "Mark Resolved",
+	"mark-unresolved": "Mark Unresolved",
+	"marked-resolved": "Topic marked as resolved.",
+	"marked-unresolved": "Topic marked as unresolved."
 }

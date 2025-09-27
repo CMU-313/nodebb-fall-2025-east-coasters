@@ -4,6 +4,7 @@ const express = require('express');
 
 const uploadsController = require('../controllers/uploads');
 const helpers = require('./helpers');
+const apiTopics = require('../api/topics');
 
 module.exports = function (app, middleware, controllers) {
 	const middlewares = [middleware.autoLocale, middleware.authenticateRequest];
@@ -22,6 +23,19 @@ module.exports = function (app, middleware, controllers) {
 	router.get('/unread/total', [...middlewares, middleware.ensureLoggedIn], helpers.tryRoute(controllers.unread.unreadTotal));
 	router.get('/topic/teaser/:topic_id', [...middlewares], helpers.tryRoute(controllers.topics.teaser));
 	router.get('/topic/pagination/:topic_id', [...middlewares], helpers.tryRoute(controllers.topics.pagination));
+
+	router.put('/topics/:tid/resolve', [...middlewares, middleware.ensureLoggedIn], helpers.tryRoute(async (req, res) => {
+		console.log('In api.js before api result');
+		const result = await apiTopics.resolve({ uid: req.uid }, { tid: req.params.tid });
+		console.log('In api.js after api result');
+		console.log(result);
+		res.json(result);
+	}));
+
+	router.delete('/topics/:tid/resolve', [...middlewares, middleware.ensureLoggedIn], helpers.tryRoute(async (req, res) => {
+		const result = await apiTopics.unresolve({ uid: req.uid }, { tid: req.params.tid });
+		res.json(result);
+	}));
 
 	const multipart = require('connect-multiparty');
 	const multipartMiddleware = multipart();

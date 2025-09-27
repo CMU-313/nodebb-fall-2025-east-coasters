@@ -61,6 +61,24 @@ define('forum/topic/threadTools', [
 			return false;
 		});
 
+		topicContainer.on('click', '[component="topic/resolve"]', function () {
+			topicCommand('put', '/resolve', 'resolve', function () {
+				console.log('In threadTools.js success case');
+				alerts.success('Marked as resolved!');
+			});
+			console.log('In threadTools.js fail case');
+			return false;
+		});
+
+		topicContainer.on('click', '[component="topic/unresolve"]', function () {
+			console.log('Handler picked up button click');
+			topicCommand('del', '/resolve', 'unresolve', function () {
+				alerts.success('Marked as unresolved!');
+			});
+			return false;
+		});
+
+
 		topicContainer.on('click', '[component="topic/mark-unread"]', function () {
 			topicCommand('del', '/read', undefined, () => {
 				if (app.previousUrl && !app.previousUrl.match('^/topic')) {
@@ -385,6 +403,24 @@ define('forum/topic/threadTools', [
 		}
 		ajaxify.data.pinned = data.pinned;
 
+		posts.addTopicEvents(data.events);
+	};
+
+	ThreadTools.setResolvedState = function (data) {
+		const threadEl = components.get('topic');
+		if (String(data.tid) !== threadEl.attr('data-tid')) {
+			return;
+		}
+
+		components.get('topic/resolve').toggleClass('hidden', data.resolved).parent().attr('hidden', data.resolved ? '' : null);
+		components.get('topic/unresolve').toggleClass('hidden', !data.resolved).parent().attr('hidden', !data.resolved ? '' : null);
+		const icon = $('[component="topic/labels"] [component="topic/resolved"]');
+		icon.toggleClass('hidden', !data.resolved);
+		if (data.resolved) {
+			icon.translateAttr('title', '[[topic:resolved]]');
+		}
+		ajaxify.data.resolved = data.resolved;
+		
 		posts.addTopicEvents(data.events);
 	};
 
