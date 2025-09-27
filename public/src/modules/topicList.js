@@ -241,6 +241,7 @@ define('topicList', [
 			topicListEl.removeClass('hidden');
 			$('#category-no-topics').remove();
 
+			
 			insertHtml(html, after, before, topicListEl);
 
 			if (!topicSelect.getSelectedTids().length) {
