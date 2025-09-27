@@ -1,0 +1,17 @@
+openapi: 3.0.0
+info:
+  title: Classes Read API
+  version: 1.0.0
+paths:
+  /api/classes:
+    get:
+      tags:
+        - categories
+      summary: Retrieve classes (course categories)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
