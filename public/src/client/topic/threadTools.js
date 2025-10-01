@@ -260,6 +260,16 @@ define('forum/topic/threadTools', [
 		const body = {};
 		const execute = function (ok) {
 			if (ok) {
+			// Handle resolve and unresolve commands using WebSocket events
+				if (command === 'resolve' || command === 'unresolve') {
+					socket.emit(`topics.${command}`, { tid }, (err, result) => {
+						if (err) {
+							return alerts.error(err.message);
+						}
+						onComplete(result);
+					});
+					return;
+				}
 				api[method](`/topics/${tid}${path}`, body)
 					.then(onComplete)
 					.catch(alerts.error);

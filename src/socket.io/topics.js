@@ -133,17 +133,29 @@ require('../promisify')(SocketTopics);
 
 // Add a function to register socket event handlers
 SocketTopics.registerHandlers = function (socket) {
-	socket.on('topics.markResolved', async (data) => {
-		if (!data || !data.tid) {
-			throw new Error('[[error:invalid-data]]');
+	// Register the topics.resolve event
+	socket.on('topics.resolve', async (data, callback) => {
+		try {
+			if (!data || !data.tid) {
+				throw new Error('[[error:invalid-data]]');
+			}
+			await topicsAPI.resolve({ uid: socket.uid }, { tid: data.tid });
+			callback(null, { tid: data.tid, resolved: true });
+		} catch (err) {
+			callback(err);
 		}
-		await topicsAPI.markResolved(socket, data);
 	});
 
-	socket.on('topics.markUnresolved', async (data) => {
-		if (!data || !data.tid) {
-			throw new Error('[[error:invalid-data]]');
+	// Register the topics.unresolve event
+	socket.on('topics.unresolve', async (data, callback) => {
+		try {
+			if (!data || !data.tid) {
+				throw new Error('[[error:invalid-data]]');
+			}
+			await topicsAPI.unresolve({ uid: socket.uid }, { tid: data.tid });
+			callback(null, { tid: data.tid, resolved: false });
+		} catch (err) {
+			callback(err);
 		}
-		await topicsAPI.markUnresolved(socket, data);
 	});
 };
