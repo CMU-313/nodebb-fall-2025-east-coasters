@@ -90,24 +90,19 @@ Topics.unlock = async (req, res) => {
 };
 
 Topics.resolve = async (req, res) => {
-    // Mark a topic resolved
-    await api.topics.setTopicField(req, {
-        tid: req.params.tid,
-        field: 'resolved',
-        value: 1,
-    });
-    helpers.formatApiResponse(200, res, { resolved: true });
+	console.log('--- RESOLVE CALLED ---', req.params.tid, 'by user', req.uid);  
+	const tid = parseInt(req.params.tid, 10);
+	await topics.setTopicField(tid, 'resolved', 1);
+	helpers.formatApiResponse(200, res, { tid, resolved: true });
 };
 
-Topics.unresolve = async (req, res) => {
-    // Mark a topic unresolved
-    await api.topics.setTopicField(req, {
-        tid: req.params.tid,
-        field: 'resolved',
-        value: 0,
-    });
-    helpers.formatApiResponse(200, res, { resolved: false });
-};
+
+// Topics.unresolve = async (req, res) => {
+// 	console.log('--- UNRESOLVE CALLED ---', req.params.tid, 'by user', req.uid);  
+// 	const tid = parseInt(req.params.tid, 10);
+// 	await topics.setTopicField(tid, 'resolved', 0);
+// 	helpers.formatApiResponse(200, res, { tid, resolved: false });
+// };
 
 Topics.follow = async (req, res) => {
 	await api.topics.follow(req, req.params);

@@ -28,8 +28,8 @@ module.exports = function () {
 	setupApiRoute(router, 'delete', '/:tid/lock', [...middlewares], controllers.write.topics.unlock);
 
 	// Resolve / Unresolve
-	setupApiRoute(router, 'put', '/:tid/resolve', [...middlewares, middleware.assert.topic], controllers.write.topics.resolve);
-	setupApiRoute(router, 'delete', '/:tid/resolve', [...middlewares, middleware.assert.topic], controllers.write.topics.unresolve);
+	setupApiRoute(router, 'put', '/:tid/resolve', [...middlewares], controllers.write.topics.resolve);
+	// setupApiRoute(router, 'delete', '/:tid/resolve', [...middlewares], controllers.write.topics.unresolve);
 
 
 	setupApiRoute(router, 'put', '/:tid/follow', [...middlewares, middleware.assert.topic], controllers.write.topics.follow);

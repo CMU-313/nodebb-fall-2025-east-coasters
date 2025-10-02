@@ -48,6 +48,13 @@
 						<i class="fa fa-arrow-circle-right"></i>
 						<span>[[topic:moved]]</span>
 					</span>
+
+					<span component="topic/resolved" class="badge border border-gray-300 text-body {{{ if !./resolved }}}hidden{{{ end }}}">
+						<i class="fa fa-check text-success"></i>
+						<span>[[topic:resolved]]</span>
+					</span>
+
+
 					{{{each ./icons}}}<span class="lh-1">{@value}</span>{{{end}}}
 
 					{{{ if !template.category }}}
