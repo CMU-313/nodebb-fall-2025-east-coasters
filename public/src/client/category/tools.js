@@ -246,6 +246,10 @@ define('forum/category/tools', [
 		components.get('topic/merge').toggleClass('hidden', isAnyScheduled);
 	}
 
+	function isTopicScheduled(tid) {
+		return getTopicEl(tid).hasClass('scheduled');
+	}
+
 	function isTopicResolved(tid) {
 		return getTopicEl(tid).hasClass('resolved');
 	}
@@ -253,6 +257,7 @@ define('forum/category/tools', [
 	function getTopicEl(tid) {
 		return components.get('category/topic', 'tid', tid);
 	}
+
 
 	function isAny(method, tids) {
 		for (let i = 0; i < tids.length; i += 1) {
@@ -282,10 +287,6 @@ define('forum/category/tools', [
 
 	function isTopicPinned(tid) {
 		return getTopicEl(tid).hasClass('pinned');
-	}
-
-	function isTopicScheduled(tid) {
-		return getTopicEl(tid).hasClass('scheduled');
 	}
 
 	function setDeleteState(data) {
