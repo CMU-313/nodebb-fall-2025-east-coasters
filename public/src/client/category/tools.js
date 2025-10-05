@@ -62,7 +62,6 @@ define('forum/category/tools', [
 			return false;
 		});
 
-		// change this so that we no longer include unresolve handlers 
 		components.get('topic/unresolve').on('click', function () {
 			categoryCommand('del', '/resolve', 'unresolve', onCommandComplete);
 			return false;
