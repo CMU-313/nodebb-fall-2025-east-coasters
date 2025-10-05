@@ -10,6 +10,7 @@ const meta = require('../meta');
 const privileges = require('../privileges');
 const cache = require('../cache');
 const events = require('../events');
+const topicsAPI = require('../api/topics');
 
 const SocketTopics = module.exports;
 
@@ -129,3 +130,32 @@ SocketTopics.getPostCountInTopic = async function (socket, tid) {
 };
 
 require('../promisify')(SocketTopics);
+
+// Add a function to register socket event handlers
+SocketTopics.registerHandlers = function (socket) {
+	// Register the topics.resolve event
+	socket.on('topics.resolve', async (data, callback) => {
+		try {
+			if (!data || !data.tid) {
+				throw new Error('[[error:invalid-data]]');
+			}
+			await topicsAPI.resolve({ uid: socket.uid }, { tid: data.tid });
+			callback(null, { tid: data.tid, resolved: true });
+		} catch (err) {
+			callback(err);
+		}
+	});
+
+	// Register the topics.unresolve event
+	socket.on('topics.unresolve', async (data, callback) => {
+		try {
+			if (!data || !data.tid) {
+				throw new Error('[[error:invalid-data]]');
+			}
+			await topicsAPI.unresolve({ uid: socket.uid }, { tid: data.tid });
+			callback(null, { tid: data.tid, resolved: false });
+		} catch (err) {
+			callback(err);
+		}
+	});
+};

@@ -1,4 +1,3 @@
-
 'use strict';
 
 
@@ -245,7 +244,6 @@ define('forum/category/tools', [
 		components.get('topic/unresolve').toggleClass('hidden', !isAnyResolved);
 
 		components.get('topic/merge').toggleClass('hidden', isAnyScheduled);
-		
 	}
 
 	function isTopicScheduled(tid) {

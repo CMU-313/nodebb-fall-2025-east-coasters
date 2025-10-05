@@ -16,6 +16,7 @@ const ratelimit = require('../middleware/ratelimit');
 const blacklist = require('../meta/blacklist');
 const als = require('../als');
 const apiHelpers = require('../api/helpers');
+const SocketTopics = require('./topics');
 
 const Namespaces = Object.create(null);
 
@@ -86,6 +87,8 @@ function onConnection(socket) {
 	).split(',')[0];
 	socket.request.ip = socket.ip;
 	logger.io_one(socket, socket.uid);
+
+	SocketTopics.registerHandlers(socket);
 
 	onConnect(socket);
 	socket.onAny((event, ...args) => {

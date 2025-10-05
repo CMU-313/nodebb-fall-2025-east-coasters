@@ -61,14 +61,20 @@ define('forum/topic/threadTools', [
 			return false;
 		});
 
-		// Add this new handler for resolved
 		topicContainer.on('click', '[component="topic/resolve"]', function () {
-			topicCommand('put', '/resolve', 'resolve');
+			topicCommand('put', '/resolve', 'resolve', function () {
+				console.log('In threadTools.js success case');
+				alerts.success('Marked as resolved!');
+			});
+			console.log('In threadTools.js fail case');
 			return false;
 		});
 
 		topicContainer.on('click', '[component="topic/unresolve"]', function () {
-			topicCommand('del', '/resolve', 'unresolve');
+			console.log('Handler picked up button click');
+			topicCommand('del', '/resolve', 'unresolve', function () {
+				alerts.success('Marked as unresolved!');
+			});
 			return false;
 		});
 
@@ -254,6 +260,16 @@ define('forum/topic/threadTools', [
 		const body = {};
 		const execute = function (ok) {
 			if (ok) {
+			// Handle resolve and unresolve commands using WebSocket events
+				if (command === 'resolve' || command === 'unresolve') {
+					socket.emit(`topics.${command}`, { tid }, (err, result) => {
+						if (err) {
+							return alerts.error(err.message);
+						}
+						onComplete(result);
+					});
+					return;
+				}
 				api[method](`/topics/${tid}${path}`, body)
 					.then(onComplete)
 					.catch(alerts.error);
