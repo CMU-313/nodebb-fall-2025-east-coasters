@@ -401,11 +401,13 @@ define('forum/topic/threadTools', [
 	};
 
 	ThreadTools.setResolvedState = function (data) {
+		// added constant to get topic 
 		const threadEl = components.get('topic');
 		if (String(data.tid) !== threadEl.attr('data-tid')) {
 			return;
 		}
-
+		
+		// toggle the visibility of resolve and unresolve buttons
 		components.get('topic/resolve').toggleClass('hidden', data.resolved).parent().attr('hidden', data.resolved ? '' : null);
 		components.get('topic/unresolve').toggleClass('hidden', !data.resolved).parent().attr('hidden', !data.resolved ? '' : null);
 		const icon = $('[component="topic/labels"] [component="topic/resolved"]');
