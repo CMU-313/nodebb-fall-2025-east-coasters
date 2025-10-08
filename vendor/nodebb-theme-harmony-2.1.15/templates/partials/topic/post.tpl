@@ -13,7 +13,7 @@
 
 <div class="bg-body d-none d-sm-block rounded-circle" style="outline: 2px solid var(--bs-body-bg); width: 48px; height: 48px;">
   {{{ if ./anonymous }}}
-    <div class="d-flex justify-content-center align-items-center h-100 w-100 rounded-circle bg-secondary text-white fw-bold" title="Anonymous">A</div>
+    <div class="d-flex justify-content-center align-items-center h-48 w-48 rounded-circle bg-secondary text-white" style="font-size: 28px; width: 48px; height: 48px;" title="Anonymous">A</div>
   {{{ else }}}
     <a class="d-inline-block position-relative text-decoration-none" href="{{{ if ./user.userslug }}}{config.relative_path}/user/{./user.userslug}{{{ else }}}#{{{ end }}}" aria-label="[[aria:profile-page-for, {./user.displayname}]]">
       {buildAvatar(posts.user, "48px", true, "", "user/picture")}
