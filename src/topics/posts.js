@@ -72,7 +72,10 @@ module.exports = function (Topics) {
 		const result = await plugins.hooks.fire('filter:topic.getPosts', {
 			topic: topicData,
 			uid: uid,
-			posts: await Topics.addPostData(postData, uid),
+			posts: (await Topics.addPostData(postData, uid)).map(p => ({
+				...p,
+				anonymous: p && p.anonymous === 1 ? true : !!p.anonymous,
+			})),
 		});
 		return result.posts;
 	};
