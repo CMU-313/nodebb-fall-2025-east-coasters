@@ -88,7 +88,7 @@ function onConnection(socket) {
 	socket.request.ip = socket.ip;
 	logger.io_one(socket, socket.uid);
 
-	SocketTopics.registerHandlers(socket);
+	// SocketTopics.registerHandlers(socket);
 
 	onConnect(socket);
 	socket.onAny((event, ...args) => {
