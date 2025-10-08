@@ -94,13 +94,19 @@ Topics.getTopicsByTids = async function (tids, options) {
 			return data;
 		}
 
-		const [teasers, users, userSettings, categoriesData, guestHandles, thumbs] = await Promise.all([
+		const [teasers, users, userSettings, categoriesData, guestHandles, thumbs, mainPostsAnon] = await Promise.all([
 			Topics.getTeasers(topics, options),
 			user.getUsersFields(uids, ['uid', 'username', 'fullname', 'userslug', 'reputation', 'postcount', 'picture', 'signature', 'banned', 'status']),
 			loadShowfullnameSettings(),
 			categories.getCategoriesFields(cids, ['cid', 'name', 'slug', 'icon', 'backgroundImage', 'imageClass', 'bgColor', 'color', 'disabled']),
 			loadGuestHandles(),
 			Topics.thumbs.load(topics),
+			// load anonymous flag from main post for each topic
+			(async () => {
+				const mainPids = topics.map(t => t && t.mainPid);
+				const postsData = await posts.getPostsFields(mainPids, ['pid', 'anonymous']);
+				return postsData.map(p => p ? p.anonymous === 1 : false);
+			})(),
 		]);
 
 		users.forEach((userObj, idx) => {
@@ -117,6 +123,7 @@ Topics.getTopicsByTids = async function (tids, options) {
 			categoriesMap: _.zipObject(cids, categoriesData),
 			tidToGuestHandle: _.zipObject(guestTopics.map(t => t.tid), guestHandles),
 			thumbs,
+			mainPostsAnon,
 		};
 	}
 
@@ -133,7 +140,10 @@ Topics.getTopicsByTids = async function (tids, options) {
 		if (topic) {
 			topic.thumbs = result.thumbs[i];
 			topic.category = result.categoriesMap[topic.cid];
-			topic.user = topic.uid ? result.usersMap[topic.uid] : { ...result.usersMap[topic.uid] };
+			topic.user = topic.uid ? result.usersMap[topic.uid]
+			// expose topic-level anonymous flag from main post
+			topic.anonymous = !!result.mainPostsAnon[i];
+			 : { ...result.usersMap[topic.uid] };
 			if (result.tidToGuestHandle[topic.tid]) {
 				topic.user.username = validator.escape(result.tidToGuestHandle[topic.tid]);
 				topic.user.displayname = topic.user.username;
