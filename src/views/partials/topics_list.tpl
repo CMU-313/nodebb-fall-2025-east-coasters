@@ -22,6 +22,18 @@
 <a class="text-reset" href="{{{ if topics.noAnchor }}}#{{{ else }}}{config.relative_path}/topic/{./slug}{{{ if ./bookmark }}}/{./bookmark}{{{ end }}}{{{ end }}}">{./title}</a>
 </h3>
 <span component="topic/labels" class="d-flex flex-wrap gap-1 w-100">
+<span component="topic/resolved"
+data-tid="{./tid}"
+class="badge border border-gray-300 text-body {{{ if !./resolved }}}hidden{{{ end }}}">
+<i class="fa fa-check text-success"></i>
+<span>[[topic:resolved]]</span>
+</span>
+
+{{{each ./icons}}}<span class="lh-1">{@value}</span>{{{end}}}
+{{{ if !template.category }}}
+{buildCategoryLabel(./category, "a", "border")}
+{{{ end }}}
+
 <span component="topic/watched" class="badge border border-gray-300 text-body {{{ if !./followed }}}hidden{{{ end }}}">
 <i class="fa fa-bell-o"></i>
 <span>[[topic:watching]]</span>
