@@ -1,5 +1,6 @@
 'use strict';
 
+const topics = require('../topics'); // add this line
 
 const nconf = require('nconf');
 const validator = require('validator');
@@ -180,8 +181,17 @@ categoryController.get = async function (req, res, next) {
 			categoryData.handleFull = `${categoryData.handle}@${nconf.get('url_parsed').host}`;
 		}
 	}
-
+	if (Array.isArray(categoryData.topics) && categoryData.topics.length) {
+		const tids = categoryData.topics.map(t => t && t.tid).filter(Boolean);
+		const rows = await topics.getTopicsFields(tids, ['resolved']); 
+		
+		categoryData.topics = categoryData.topics.map((t, i) => ({
+			...t,
+			resolved: !!(+rows[i]?.resolved),
+		}));
+	}
 	res.render('category', categoryData);
+
 };
 
 async function buildBreadcrumbs(req, categoryData) {

@@ -1,6 +1,11 @@
 <ul component="category" class="topics-list list-unstyled" itemscope itemtype="http://www.schema.org/ItemList" data-nextstart="{nextStart}" data-set="{set}">
 {{{ each topics }}}
-<li component="category/topic" class="category-item hover-parent border-bottom py-3 py-lg-4 d-flex flex-column flex-lg-row align-items-start {function.generateTopicClass}" data-tid="{topics.tid}" data-index="{topics.index}" data-cid="{topics.cid}" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+<li component="category/topic"
+    class="category-item hover-parent border-bottom py-3 py-lg-4 d-flex flex-column flex-lg-row align-items-start {function.generateTopicClass}"
+    data-tid="{./tid}" data-index="{./index}" data-cid="{./cid}"
+    itemprop="itemListElement"
+    itemscope
+    itemtype="https://schema.org/ListItem">
 <link itemprop="url" content="{config.relative_path}/topic/{./slug}" />
 <meta itemprop="name" content="{function.stripTags, ./title}" />
 <meta itemprop="itemListOrder" content="descending" />
@@ -22,17 +27,13 @@
 <a class="text-reset" href="{{{ if topics.noAnchor }}}#{{{ else }}}{config.relative_path}/topic/{./slug}{{{ if ./bookmark }}}/{./bookmark}{{{ end }}}{{{ end }}}">{./title}</a>
 </h3>
 <span component="topic/labels" class="d-flex flex-wrap gap-1 w-100">
-<span component="topic/resolved"
-data-tid="{./tid}"
-class="badge border border-gray-300 text-body {{{ if !./resolved }}}hidden{{{ end }}}">
-<i class="fa fa-check text-success"></i>
-<span>[[topic:resolved]]</span>
-</span>
 
-{{{each ./icons}}}<span class="lh-1">{@value}</span>{{{end}}}
-{{{ if !template.category }}}
-{buildCategoryLabel(./category, "a", "border")}
-{{{ end }}}
+<span component="topic/resolved"
+        data-tid="{./tid}"
+        class="badge border border-gray-300 text-body {{{ if !./resolved }}}hidden{{{ end }}}">
+    <i class="fa fa-check text-success"></i>
+    <span>[[topic:resolved]]</span>
+</span>
 
 <span component="topic/watched" class="badge border border-gray-300 text-body {{{ if !./followed }}}hidden{{{ end }}}">
 <i class="fa fa-bell-o"></i>
