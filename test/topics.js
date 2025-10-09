@@ -2000,7 +2000,10 @@ describe('Topic\'s', () => {
 		it('should get teasers with 2 params', (done) => {
 			topics.getTeasers([topic1.topicData, topic2.topicData], 1, (err, teasers) => {
 				assert.ifError(err);
-				assert.deepEqual([undefined, undefined], teasers);
+				// assert.deepEqual([undefined, undefined], teasers);
+				assert.equal(2, teasers.length);
+				assert(teasers[0].content, 'content 1');
+				assert(teasers[1].content, 'content 2');
 				done();
 			});
 		});
