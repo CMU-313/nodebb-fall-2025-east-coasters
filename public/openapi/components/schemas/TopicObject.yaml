@@ -168,6 +168,9 @@ TopicObject:
           type: number
         unreplied:
           type: boolean
+        anonymous:
+          type: boolean
+          description: Whether the main post of this topic is anonymous
         icons:
           type: array
           items:
