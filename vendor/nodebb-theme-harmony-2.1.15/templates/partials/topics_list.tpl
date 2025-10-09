@@ -56,9 +56,6 @@
   						<i class="fa fa-times text-danger"></i>
   						<span>[[topic:unresolved]]</span>
 					</span>
-
-
-
 					{{{each ./icons}}}<span class="lh-1">{@value}</span>{{{end}}}
 
 					{{{ if !template.category }}}
