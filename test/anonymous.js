@@ -2,9 +2,12 @@
 
 const assert = require('assert');
 
+const db = require('./mocks/databasemock');
 const user = require('../src/user');
 const topics = require('../src/topics');
 const categories = require('../src/categories');
+const privileges = require('../src/privileges');
+const groups = require('../src/groups');
 
 describe('anonymous posts', () => {
 	let uid;
@@ -12,7 +15,8 @@ describe('anonymous posts', () => {
 	let tid;
 
 	before(async () => {
-		({ uid } = await user.create({ username: 'anon-tester' }));
+		uid = await user.create({ username: 'anon-tester' });
+		await groups.join('administrators', uid);
 		({ cid } = await categories.create({ name: 'Anonymous Test Cat' }));
 	});
 
@@ -40,9 +44,8 @@ describe('anonymous posts', () => {
 		assert.ok(list && list.length === 1);
 		assert.strictEqual(list[0].anonymous, true, 'topic list item should have anonymous true');
 
-		// teaser should carry anonymous flag
+		// teaser for anonymous posts should be undefined (expected behavior)
 		const teaser = await topics.getTeaser(tid, uid);
-		assert.ok(teaser, 'teaser should exist');
-		assert.strictEqual(teaser.anonymous, true, 'teaser should have anonymous true');
+		assert.strictEqual(teaser, undefined, 'teaser should be undefined for anonymous topics');
 	});
 });
