@@ -68,7 +68,13 @@ module.exports = function (Topics) {
 			post.timestampISO = utils.toISOString(post.timestamp);
 			// need to convert anonymous in postData back to boolean
 			post.anonymous = post.anonymous === 1;
-			tidToPost[post.tid] = post;
+
+			// hide teasers for anonymous posts entirely (expected behaviour per tests/UI)
+			if (!post.anonymous) {
+				tidToPost[post.tid] = post;
+			} else {
+				tidToPost[post.tid] = undefined;
+			}
 		});
 		await Promise.all(postData.map(p => posts.parsePost(p, 'plaintext')));
 
@@ -120,7 +126,8 @@ module.exports = function (Topics) {
 		let checkedAllReplies = false;
 
 		function checkBlocked(post) {
-			const isPostBlocked = blockedUids.includes(parseInt(post.uid, 10));
+			// Skip posts from blocked users or anonymous posts for teaser purposes
+			const isPostBlocked = blockedUids.includes(parseInt(post.uid, 10)) || !!post.anonymous;
 			prevPost = !isPostBlocked ? post : prevPost;
 			return isPostBlocked;
 		}
@@ -135,6 +142,8 @@ module.exports = function (Topics) {
 			}
 			// Need to provide anonymous field to callers
 			const prevPosts = await posts.getPostsFields(pids, ['pid', 'uid', 'timestamp', 'tid', 'content', 'anonymous']);
+			// normalize anonymous int->boolean for fallback posts as well
+			prevPosts.forEach(p => { if (p) { p.anonymous = p.anonymous === 1; } });
 			isBlocked = prevPosts.every(checkBlocked);
 			start += postsPerIteration;
 			stop = start + postsPerIteration - 1;
