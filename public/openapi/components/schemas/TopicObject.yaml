@@ -106,6 +106,16 @@ TopicObject:
               description: A topic identifier
             content:
               type: string
+
+            sourceContent:
+              type: string
+              nullable: true
+              description: The raw, unprocessed version of the teaser content
+
+            anonymous:
+              type: boolean
+              description: Whether this post is anonymous
+
             timestampISO:
               type: string
               description: An ISO 8601 formatted date string (complementing `timestamp`)
@@ -118,6 +128,15 @@ TopicObject:
                 username:
                   type: string
                   description: A friendly name for a given user account
+
+                displayname:
+                  type: string
+                  description: This is either username or fullname depending on forum and user settings
+
+                isLocal:
+                  type: boolean
+                  description: Whether the user belongs to the local installation or not.
+
                 userslug:
                   type: string
                   description: An URL-safe variant of the username (i.e. lower-cased, spaces
