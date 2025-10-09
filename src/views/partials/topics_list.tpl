@@ -29,8 +29,8 @@
 <span component="topic/labels" class="d-flex flex-wrap gap-1 w-100">
 
 <span component="topic/resolved"
-        data-tid="{./tid}"
-        class="badge border border-gray-300 text-body {{{ if !./resolved }}}hidden{{{ end }}}">
+    data-tid="{./tid}"
+    class="badge border border-gray-300 text-body {{{ if !./resolved }}}hidden{{{ end }}}">
     <i class="fa fa-check text-success"></i>
     <span>[[topic:resolved]]</span>
 </span>
