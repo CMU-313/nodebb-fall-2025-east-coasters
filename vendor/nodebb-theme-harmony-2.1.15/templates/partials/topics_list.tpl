@@ -120,8 +120,18 @@
 					{{{ else }}}
 					{{{ if ./teaser.pid }}}
 					<div class="ps-2">
+						<span class="d-inline-flex align-items-center">
+						{{{ if ./anonymous }}}
+							<span>
+							<div class="h-18 w-18 rounded-circle bg-secondary text-white d-flex d-inline-block align-items-center justify-content-center" style="width: 18px; height: 18px; font-size: 12px !important;" title="Anonymous">A</div>
+							</span>
+							<a class="permalink text-muted timeago text-xs ms-1" href="{config.relative_path}/topic/{./slug}/{./teaser.index}" title="{./teaser.timestampISO}" aria-label="[[global:lastpost]]"></a>
+						</span>
+						{{{ else }}}
 						<a href="{{{ if ./teaser.user.userslug }}}{config.relative_path}/user/{./teaser.user.userslug}{{{ else }}}#{{{ end }}}" class="text-decoration-none avatar-tooltip" title="{./teaser.user.displayname}">{buildAvatar(./teaser.user, "18px", true)}</a>
-						<a class="permalink text-muted timeago text-xs" href="{config.relative_path}/topic/{./slug}/{./teaser.index}" title="{./teaser.timestampISO}" aria-label="[[global:lastpost]]"></a>
+						<a class="permalink text-muted timeago text-xs ms-1" href="{config.relative_path}/topic/{./slug}/{./teaser.index}" title="{./teaser.timestampISO}" aria-label="[[global:lastpost]]"></a>
+						{{{ end }}}
+					
 					</div>
 					<div class="post-content text-xs ps-2 line-clamp-sm-2 lh-sm text-break position-relative flex-fill">
 						<a class="stretched-link" tabindex="-1" href="{config.relative_path}/topic/{./slug}/{./teaser.index}" aria-label="[[global:lastpost]]"></a>
