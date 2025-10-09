@@ -36,8 +36,8 @@ module.exports = function (Topics) {
 					teaserPids.push(topic.mainPid);
 				} else if (teaserPost === 'last-post') {
 					teaserPids.push(topic.teaserPid || topic.mainPid);
-				} else { // last-reply and everything else uses teaserPid like `last` that was used before
-					teaserPids.push(topic.teaserPid);
+				} else { // last-reply and everything else uses teaserPid; fall back to mainPid if not set
+					teaserPids.push(topic.teaserPid || topic.mainPid);
 				}
 			}
 		});
@@ -69,14 +69,13 @@ module.exports = function (Topics) {
 			// need to convert anonymous in postData back to boolean
 			post.anonymous = post.anonymous === 1;
 
-			// hide teasers for anonymous posts entirely (expected behaviour per tests/UI)
-			if (!post.anonymous) {
-				tidToPost[post.tid] = post;
-			} else {
-				tidToPost[post.tid] = undefined;
-			}
+
+			// Always allow teasers, including anonymous. Do not redact uid/user; templates guard display via `anonymous`.
+			tidToPost[post.tid] = post;
 		});
 		await Promise.all(postData.map(p => posts.parsePost(p, 'plaintext')));
+
+		// Note: Do not sanitize post.content here. Templates are expected to handle anonymous display.
 
 		const teasers = topics.map((topic, index) => {
 			if (!topic) {
@@ -126,8 +125,8 @@ module.exports = function (Topics) {
 		let checkedAllReplies = false;
 
 		function checkBlocked(post) {
-			// Skip posts from blocked users or anonymous posts for teaser purposes
-			const isPostBlocked = blockedUids.includes(parseInt(post.uid, 10)) || !!post.anonymous;
+			// Skip posts only from blocked users; allow anonymous posts (sanitized by template)
+			const isPostBlocked = blockedUids.includes(parseInt(post.uid, 10));
 			prevPost = !isPostBlocked ? post : prevPost;
 			return isPostBlocked;
 		}

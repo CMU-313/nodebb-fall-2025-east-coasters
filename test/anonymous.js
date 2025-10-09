@@ -44,8 +44,9 @@ describe('anonymous posts', () => {
 		assert.ok(list && list.length === 1);
 		assert.strictEqual(list[0].anonymous, true, 'topic list item should have anonymous true');
 
-		// teaser for anonymous posts should be undefined (expected behavior)
+		// teaser for anonymous topics should now exist but be anonymous; identity is not shown in templates
 		const teaser = await topics.getTeaser(tid, uid);
-		assert.strictEqual(teaser, undefined, 'teaser should be undefined for anonymous topics');
+		assert.ok(teaser && teaser.pid, 'teaser should exist for anonymous topics');
+		assert.strictEqual(teaser.anonymous, true, 'teaser should be marked anonymous');
 	});
 });
