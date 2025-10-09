@@ -37,6 +37,9 @@ get:
                               nullable: true
                             titleRaw:
                               type: string
+                            anonymous:
+                              type: boolean
+                              description: Whether this topic contains anonymous posts
                             category:
                               type: object
                               properties:
@@ -141,6 +144,9 @@ get:
                                 timestampISO:
                                   type: string
                                   description: An ISO 8601 formatted date string (complementing `timestamp`)
+                                anonymous:
+                                  type: boolean
+                                  description: Whether this post is anonymous
                                 user:
                                   type: object
                                   properties:
