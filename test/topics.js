@@ -2535,3 +2535,12 @@ describe('Category Topics API (resolved field)', () => {
 			description: 'Testing resolved boolean',
 		});
 		cid = category.cid;
+
+		const result = await topics.post({
+			uid: 1, // admin user from earlier setup
+			title: 'Test Resolved Field',
+			content: 'testing resolved normalization',
+			cid,
+		});
+		tid = result.topicData.tid;
+	});
