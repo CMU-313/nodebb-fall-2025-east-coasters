@@ -2529,16 +2529,11 @@ describe('Category Topics API (resolved field)', function () {
 	let cid;
 
 	before(async function () {
-		// admin user
 		adminUid = await User.create({ username: 'resolved_admin', password: '123456' });
 		await groups.join('administrators', adminUid);
-
-		// category that everyone can read
 		const cat = await categories.create({ name: 'Resolved API Cat' });
 		cid = cat.cid;
 		await privileges.categories.give(['groups:topics:read'], cid, 'guests');
-
-		// one topic in that category (resolved defaults false unless your logic sets it)
 		await topics.post({
 			uid: adminUid,
 			cid,
@@ -2559,7 +2554,6 @@ describe('Category Topics API (resolved field)', function () {
 				'Topic should include "resolved" property'
 			);
 		} else {
-			// no topics is still a pass (endpoint works)
 			assert.ok(true);
 		}
 	});
