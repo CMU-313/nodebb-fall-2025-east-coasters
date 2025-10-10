@@ -2521,3 +2521,17 @@ describe('Topics\'', async () => {
 		});
 	});
 });
+
+
+
+describe('Category Topics API (resolved field)', () => {
+	let cid;
+	let tid;
+
+	before(async () => {
+		// create a category and a topic
+		const category = await categories.create({
+			name: 'Resolved Field Test',
+			description: 'Testing resolved boolean',
+		});
+		cid = category.cid;
