@@ -16,7 +16,7 @@ const ratelimit = require('../middleware/ratelimit');
 const blacklist = require('../meta/blacklist');
 const als = require('../als');
 const apiHelpers = require('../api/helpers');
-const SocketTopics = require('./topics');
+// const SocketTopics = require('./topics');
 
 const Namespaces = Object.create(null);
 

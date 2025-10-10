@@ -10,7 +10,7 @@ const meta = require('../meta');
 const privileges = require('../privileges');
 const cache = require('../cache');
 const events = require('../events');
-const topicsAPI = require('../api/topics');
+// const topicsAPI = require('../api/topics');
 
 const SocketTopics = module.exports;
 
