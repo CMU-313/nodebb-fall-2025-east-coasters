@@ -2551,3 +2551,11 @@ describe('Category Topics API (resolved field)', () => {
 		assert.ok('resolved' in body.response.topics[0]);
 		assert.strictEqual(typeof body.response.topics[0].resolved, 'boolean');
 	});
+
+	it('resolved field should default to false if missing', async () => {
+		const { body } = await request.get(`${nconf.get('url')}/api/v3/categories/${cid}/topics`);
+		const topic = body.response.topics.find(t => t.tid === tid);
+		assert(topic);
+		assert.strictEqual(topic.resolved, false);
+	});
+
