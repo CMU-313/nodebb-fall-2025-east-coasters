@@ -79,6 +79,9 @@ jobs:
         run: |
           node app --setup="${SETUP}" --ci="${CI}"
 
+      - name: Create logs directory
+        run: mkdir -p /home/runner/work/nodebb-fall-2025-east-coasters/nodebb-fall-2025-east-coasters/logs
+
       - name: Run ESLint
         run: npm run lint
 
