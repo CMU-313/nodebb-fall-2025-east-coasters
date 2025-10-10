@@ -76,6 +76,13 @@ unreadController.get = async function (req, res) {
 	data.filters = helpers.buildFilters(baseUrl, filter, req.query);
 	data.selectedFilter = data.filters.find(filter => filter && filter.selected);
 
+	if (data && Array.isArray(data.topics)) {
+		data.topics = data.topics.filter(Boolean).map(t => ({
+			...t,
+			resolved: Boolean(t?.resolved ?? t?.isResolved ?? false),
+		}));
+
+	} 
 	res.render('unread', data);
 };
 
@@ -88,3 +95,5 @@ unreadController.unreadTotal = async function (req, res, next) {
 		next(err);
 	}
 };
+
+

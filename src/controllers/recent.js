@@ -99,6 +99,13 @@ recentController.getData = async function (req, url, sort) {
 		tags: data.pagination.rel,
 		page: page,
 	});
+
+	if (Array.isArray(data.topics)) {
+		data.topics = data.topics.filter(Boolean).map(t => ({
+			...t,
+			resolved: Boolean(t?.resolved ?? t?.isResolved ?? false),
+		}));
+	}
 	return data;
 };
 
