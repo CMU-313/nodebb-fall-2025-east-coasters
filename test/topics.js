@@ -2529,7 +2529,6 @@ describe('Category Topics API (resolved field)', () => {
 	let tid;
 
 	before(async () => {
-		// create a category and a topic
 		const category = await categories.create({
 			name: 'Resolved Field Test',
 			description: 'Testing resolved boolean',
@@ -2537,10 +2536,18 @@ describe('Category Topics API (resolved field)', () => {
 		cid = category.cid;
 
 		const result = await topics.post({
-			uid: 1, // admin user from earlier setup
+			uid: 1,
 			title: 'Test Resolved Field',
 			content: 'testing resolved normalization',
 			cid,
 		});
 		tid = result.topicData.tid;
+	});
+
+	it('should include resolved field in /api/v3/categories/:cid/topics', async () => {
+		const { body, response } = await request.get(`${nconf.get('url')}/api/v3/categories/${cid}/topics`);
+		assert.strictEqual(response.statusCode, 200);
+		assert(Array.isArray(body.response.topics));
+		assert.ok('resolved' in body.response.topics[0]);
+		assert.strictEqual(typeof body.response.topics[0].resolved, 'boolean');
 	});
