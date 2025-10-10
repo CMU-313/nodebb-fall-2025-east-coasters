@@ -142,7 +142,7 @@ module.exports = function (Topics) {
 			// Need to provide anonymous field to callers
 			const prevPosts = await posts.getPostsFields(pids, ['pid', 'uid', 'timestamp', 'tid', 'content', 'anonymous']);
 			// normalize anonymous int->boolean for fallback posts as well
-			prevPosts.forEach(p => { if (p) { p.anonymous = p.anonymous === 1; } });
+			prevPosts.forEach((p) => { if (p) { p.anonymous = p.anonymous === 1; } });
 			isBlocked = prevPosts.every(checkBlocked);
 			start += postsPerIteration;
 			stop = start + postsPerIteration - 1;
