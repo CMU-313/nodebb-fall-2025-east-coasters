@@ -190,6 +190,7 @@ categoryController.get = async function (req, res, next) {
 			resolved: !!(+rows[i]?.resolved),
 		}));
 	}
+	
 	res.render('category', categoryData);
 
 };

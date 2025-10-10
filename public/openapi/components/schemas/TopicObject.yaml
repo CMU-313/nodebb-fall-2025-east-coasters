@@ -91,6 +91,9 @@ TopicObject:
             - icon:text
             - icon:bgColor
             - banned_until_readable
+        resolved:
+          type: boolean
+          description: Whether the topic is marked as resolved
         teaser:
           type: object
           properties:
