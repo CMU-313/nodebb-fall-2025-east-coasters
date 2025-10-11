@@ -153,6 +153,9 @@ PostObject:
           type: string
     isMainPost:
       type: boolean
+    anonymous:
+      type: boolean
+      description: Whether this post is marked as anonymous and should hide user identity in UI
     replies:
       type: number
 PostDataObject:
@@ -191,6 +194,9 @@ PostDataObject:
         timestampISO:
           type: string
           description: An ISO 8601 formatted date string (complementing `timestamp`)
+        anonymous:
+          type: boolean
+          description: Whether this post is marked as anonymous and should hide user identity in UI
         editedISO:
           type: string
         index:

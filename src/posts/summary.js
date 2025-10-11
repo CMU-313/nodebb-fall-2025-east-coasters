@@ -22,7 +22,7 @@ module.exports = function (Posts) {
 		options.escape = options.hasOwnProperty('escape') ? options.escape : false;
 		options.extraFields = options.hasOwnProperty('extraFields') ? options.extraFields : [];
 
-		const fields = ['pid', 'tid', 'toPid', 'url', 'content', 'sourceContent', 'uid', 'timestamp', 'deleted', 'upvotes', 'downvotes', 'replies', 'handle'].concat(options.extraFields);
+		const fields = ['pid', 'tid', 'toPid', 'url', 'content', 'sourceContent', 'uid', 'timestamp', 'deleted', 'upvotes', 'downvotes', 'replies', 'handle', 'anonymous'].concat(options.extraFields);
 
 		let posts = await Posts.getPostsFields(pids, fields);
 		posts = posts.filter(Boolean);
@@ -49,6 +49,9 @@ module.exports = function (Posts) {
 
 			// toPid is nullable so it is casted separately
 			post.toPid = utils.isNumber(post.toPid) ? parseInt(post.toPid, 10) : post.toPid;
+
+			// anonymous is an int
+			post.anonymous = post.anonymous === 1;
 
 			post.user = uidToUser[post.uid];
 			Posts.overrideGuestHandle(post, post.handle);

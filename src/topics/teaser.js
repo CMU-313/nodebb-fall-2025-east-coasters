@@ -36,14 +36,14 @@ module.exports = function (Topics) {
 					teaserPids.push(topic.mainPid);
 				} else if (teaserPost === 'last-post') {
 					teaserPids.push(topic.teaserPid || topic.mainPid);
-				} else { // last-reply and everything else uses teaserPid like `last` that was used before
-					teaserPids.push(topic.teaserPid);
+				} else { // last-reply and everything else uses teaserPid; fall back to mainPid if not set
+					teaserPids.push(topic.teaserPid || topic.mainPid);
 				}
 			}
 		});
 
 		const [allPostData, callerSettings] = await Promise.all([
-			posts.getPostsFields(teaserPids, ['pid', 'uid', 'timestamp', 'tid', 'content', 'sourceContent']),
+			posts.getPostsFields(teaserPids, ['pid', 'uid', 'timestamp', 'tid', 'content', 'sourceContent', 'anonymous']),
 			user.getSettings(uid),
 		]);
 		let postData = allPostData.filter(post => post && post.pid);
@@ -66,9 +66,16 @@ module.exports = function (Topics) {
 
 			post.user = users[post.uid];
 			post.timestampISO = utils.toISOString(post.timestamp);
+			// need to convert anonymous in postData back to boolean
+			post.anonymous = post.anonymous === 1;
+
+
+			// Always allow teasers, including anonymous. Do not redact uid/user; templates guard display via `anonymous`.
 			tidToPost[post.tid] = post;
 		});
 		await Promise.all(postData.map(p => posts.parsePost(p, 'plaintext')));
+
+		// Note: Do not sanitize post.content here. Templates are expected to handle anonymous display.
 
 		const teasers = topics.map((topic, index) => {
 			if (!topic) {
@@ -118,6 +125,7 @@ module.exports = function (Topics) {
 		let checkedAllReplies = false;
 
 		function checkBlocked(post) {
+			// Skip posts only from blocked users; allow anonymous posts (sanitized by template)
 			const isPostBlocked = blockedUids.includes(parseInt(post.uid, 10));
 			prevPost = !isPostBlocked ? post : prevPost;
 			return isPostBlocked;
@@ -131,7 +139,10 @@ module.exports = function (Topics) {
 				const mainPid = await Topics.getTopicField(postData.tid, 'mainPid');
 				pids = [mainPid];
 			}
-			const prevPosts = await posts.getPostsFields(pids, ['pid', 'uid', 'timestamp', 'tid', 'content']);
+			// Need to provide anonymous field to callers
+			const prevPosts = await posts.getPostsFields(pids, ['pid', 'uid', 'timestamp', 'tid', 'content', 'anonymous']);
+			// normalize anonymous int->boolean for fallback posts as well
+			prevPosts.forEach((p) => { if (p) { p.anonymous = p.anonymous === 1; } });
 			isBlocked = prevPosts.every(checkBlocked);
 			start += postsPerIteration;
 			stop = start + postsPerIteration - 1;

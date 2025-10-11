@@ -30,6 +30,17 @@ module.exports = function (Posts) {
 		const pid = data.pid || await db.incrObjectField('global', 'nextPid');
 		let postData = { pid, uid, tid, content, sourceContent, timestamp };
 
+		// These are the optional flags from the composer.
+		// See deeptika's plugin-composer commits for more info
+		// The field is just called 'anonymous'
+		// Note that the falsy value is significant here,
+		// so we must use hasOwnProperty rather than a truthy check.
+		// To make this easier, we convert the boolean
+		// to an integer 0/1 here.
+		if (data.hasOwnProperty('anonymous')) {
+			postData.anonymous = data.anonymous ? 1 : 0;
+		}
+		
 		if (data.toPid) {
 			postData.toPid = data.toPid;
 		}
