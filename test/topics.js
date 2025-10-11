@@ -2524,43 +2524,59 @@ describe('Topics\'', async () => {
 });
 
 
+
 describe('Topic Resolve/Unresolve API', function () {
-	let adminUid;
-	let cid;
-	let tid;
+	let adminUid, adminJar, csrf, cid, tid;
+
 
 	before(async function () {
-		// Create admin user and category
 		adminUid = await User.create({ username: 'resolve_admin', password: '123456' });
 		await groups.join('administrators', adminUid);
+
+		const login = await helpers.loginUser('resolve_admin', '123456');
+		adminJar = login.jar;
+		csrf = login.csrf_token;
+
+		// 2 - Create a category the admin can post in bc u can't make a topic w category 
 		const cat = await categories.create({ name: 'Resolve API Cat' });
 		cid = cat.cid;
-		await privileges.categories.give(['groups:topics:read', 'groups:topics:create'], cid, 'administrators');
+		await privileges.categories.give(
+			['groups:topics:read', 'groups:topics:create'],
+			cid,
+			'administrators'
+		);
 
-		// Create topic
-		const topicData = await topics.post({
+		// 3 - Create a topic as that admin (only they r allowed to make topics)
+		const result = await topics.post({
 			uid: adminUid,
 			cid,
 			title: 'Resolve API topic',
 			content: 'Testing resolve toggle flow',
 		});
-		tid = topicData.topicData.tid;
+		tid = result.topicData.tid;
 	});
 
-
 	it('should mark topic as resolved', async function () {
-		const res = await helpers.request('put', `/api/v3/topics/${tid}/resolve`, { uid: adminUid });
+		const res = await helpers.request('put', `/api/topics/${tid}/resolve`, {
+			jar: adminJar,
+			headers: { 'x-csrf-token': csrf },
+		});
 		assert.strictEqual(res.response.statusCode, 200);
 
-		const verify = await helpers.request('get', `/api/v3/topics/${tid}`);
-		assert.strictEqual(Boolean(verify.body.response.resolved), true);
+		const verify = await helpers.request('get', `/api/v3/topics/${tid}`, { jar: adminJar });
+		const resolved = Boolean(Number(verify.body.response.resolved)); 
+		assert.strictEqual(resolved, true);
 	});
 
 	it('should mark topic as unresolved', async function () {
-		const res = await helpers.request('delete', `/api/v3/topics/${tid}/resolve`, { uid: adminUid });
+		const res = await helpers.request('delete', `/api/topics/${tid}/resolve`, {
+			jar: adminJar,
+			headers: { 'x-csrf-token': csrf },
+		});
 		assert.strictEqual(res.response.statusCode, 200);
 
-		const verify = await helpers.request('get', `/api/v3/topics/${tid}`);
-		assert.strictEqual(Boolean(verify.body.response.resolved), false);
+		const verify = await helpers.request('get', `/api/v3/topics/${tid}`, { jar: adminJar });
+		const resolved = Boolean(Number(verify.body.response.resolved));
+		assert.strictEqual(resolved, false);
 	});
 });
