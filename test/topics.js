@@ -2524,37 +2524,43 @@ describe('Topics\'', async () => {
 });
 
 
-describe('Category Topics API (resolved field)', function () {
+describe('Topic Resolve/Unresolve API', function () {
 	let adminUid;
 	let cid;
+	let tid;
 
 	before(async function () {
-		adminUid = await User.create({ username: 'resolved_admin', password: '123456' });
+		// Create admin user and category
+		adminUid = await User.create({ username: 'resolve_admin', password: '123456' });
 		await groups.join('administrators', adminUid);
-		const cat = await categories.create({ name: 'Resolved API Cat' });
+		const cat = await categories.create({ name: 'Resolve API Cat' });
 		cid = cat.cid;
-		await privileges.categories.give(['groups:topics:read'], cid, 'guests');
-		await topics.post({
+		await privileges.categories.give(['groups:topics:read', 'groups:topics:create'], cid, 'administrators');
+
+		// Create topic
+		const topicData = await topics.post({
 			uid: adminUid,
 			cid,
-			title: 'Resolved field smoke test',
-			content: 'hello',
+			title: 'Resolve API topic',
+			content: 'Testing resolve toggle flow',
 		});
+		tid = topicData.topicData.tid;
 	});
 
-	it('should include resolved field in /api/v3/categories/:cid/topics', async function () {
-		const res = await helpers.request('get', `/api/v3/categories/${cid}/topics`);
+
+	it('should mark topic as resolved', async function () {
+		const res = await helpers.request('put', `/api/v3/topics/${tid}/resolve`, { uid: adminUid });
 		assert.strictEqual(res.response.statusCode, 200);
 
-		const list = res.body?.response?.topics || [];
-		assert.ok(Array.isArray(list));
-		if (list.length) {
-			assert.ok(
-				Object.prototype.hasOwnProperty.call(list[0], 'resolved'),
-				'Topic should include "resolved" property'
-			);
-		} else {
-			assert.ok(true);
-		}
+		const verify = await helpers.request('get', `/api/v3/topics/${tid}`);
+		assert.strictEqual(Boolean(verify.body.response.resolved), true);
+	});
+
+	it('should mark topic as unresolved', async function () {
+		const res = await helpers.request('delete', `/api/v3/topics/${tid}/resolve`, { uid: adminUid });
+		assert.strictEqual(res.response.statusCode, 200);
+
+		const verify = await helpers.request('get', `/api/v3/topics/${tid}`);
+		assert.strictEqual(Boolean(verify.body.response.resolved), false);
 	});
 });
