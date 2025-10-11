@@ -109,6 +109,7 @@ topicsController.get = async function getTopic(req, res, next) {
 	topicData.updateUrlWithPostIndex = settings.updateUrlWithPostIndex;
 	topicData.allowMultipleBadges = meta.config.allowMultipleBadges === 1;
 	topicData.privateUploads = meta.config.privateUploads === 1;
+	topicData.resolved = Boolean(topicData.resolved ?? topicData.isResolved ?? false);
 	topicData.showPostPreviewsOnHover = meta.config.showPostPreviewsOnHover === 1;
 	topicData.sortOptionLabel = `[[topic:${validator.escape(String(sort)).replace(/_/g, '-')}]]`;
 	if (!meta.config['feeds:disableRSS']) {

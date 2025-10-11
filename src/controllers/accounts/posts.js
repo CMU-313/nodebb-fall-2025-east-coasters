@@ -270,6 +270,17 @@ async function getPostsFromUserSet(template, req, res) {
 		},
 	];
 
+	if (payload && Array.isArray(payload.topics)) {
+		payload.topics = payload.topics
+			.filter(Boolean)
+			.map(t => ({
+				...t,
+				resolved: Boolean(t?.resolved ?? t?.isResolved ?? false),
+			}));
+	}
+	
+
+
 	res.render(template, payload);
 }
 

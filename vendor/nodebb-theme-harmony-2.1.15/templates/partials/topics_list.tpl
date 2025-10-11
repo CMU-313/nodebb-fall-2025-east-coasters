@@ -54,6 +54,14 @@
 						<i class="fa fa-arrow-circle-right"></i>
 						<span>[[topic:moved]]</span>
 					</span>
+					<span component="topic/resolved" data-tid="{./tid}" class="badge border border-gray-300 text-body {{{ if !./resolved }}}hidden{{{ end }}}">
+						<i class="fa fa-check text-success"></i>
+						<span>[[topic:resolved]]</span>
+					</span>
+					<span component="topic/unresolved" data-tid="{./tid}" class="badge border border-gray-300 text-body {{{ if ./resolved }}}hidden{{{ end }}}">
+  						<i class="fa fa-times text-danger"></i>
+  						<span>[[topic:unresolved]]</span>
+					</span>
 					{{{each ./icons}}}<span class="lh-1">{@value}</span>{{{end}}}
 
 					{{{ if !template.category }}}

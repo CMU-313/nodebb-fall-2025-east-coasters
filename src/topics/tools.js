@@ -313,4 +313,18 @@ module.exports = function (Topics) {
 			db.sortedSetAdd(set, timestamp, tid),
 		]);
 	};
+
+	topicTools.resolve = async function (tid, uid) {
+		console.log(`[topicTools.resolve] Called for tid=${tid}, uid=${uid}`);
+		await db.setObjectField(`topic:${tid}`, 'resolved', 1);
+		console.log(`[topicTools.resolve] Set topic:${tid} resolved=1`);
+		return { tid, resolved: true };
+	};
+
+	topicTools.unresolve = async function (tid, uid) {
+		console.log(`[topicTools.unresolve] Called for tid=${tid}, uid=${uid}`);
+		await db.setObjectField(`topic:${tid}`, 'resolved', 0);
+		console.log(`[topicTools.unresolve] Set topic:${tid} resolved=0`);
+		return { tid, resolved: false };
+	};
 };

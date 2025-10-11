@@ -479,7 +479,6 @@ define('forum/topic', [
 			alerts.remove('bookmark');
 		}
 	}
-
-
+	
 	return Topic;
 });

@@ -10,6 +10,7 @@ const meta = require('../meta');
 const privileges = require('../privileges');
 const cache = require('../cache');
 const events = require('../events');
+// const topicsAPI = require('../api/topics');
 
 const SocketTopics = module.exports;
 
@@ -128,4 +129,24 @@ SocketTopics.getPostCountInTopic = async function (socket, tid) {
 	return await db.sortedSetScore(`tid:${tid}:posters`, socket.uid);
 };
 
+SocketTopics.resolve = async function (socket, data) {
+	if (!data || !data.tid) {
+		throw new Error('[[error:invalid-data]]');
+	}
+	await db.setObjectField(`topic:${data.tid}`, 'resolved', 1);
+	return { tid: data.tid, resolved: true };
+};
+
+SocketTopics.unresolve = async function (socket, data) {
+	if (!data || !data.tid) {
+		throw new Error('[[error:invalid-data]]');
+	}
+
+	await db.setObjectField(`topic:${data.tid}`, 'resolved', 0);
+	return { tid: data.tid, resolved: false };
+};
+
 require('../promisify')(SocketTopics);
+
+// Add a function to register socket event handlers
+// 

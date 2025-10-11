@@ -152,6 +152,14 @@ categoriesAPI.getTopics = async (caller, data) => {
 		targetUid,
 	});
 	categories.modifyTopicsByPrivilege(result.topics, userPrivileges);
+	if (result && Array.isArray(result.topics)) {
+		result.topics = result.topics
+			.filter(Boolean)
+			.map(t => ({
+				...t,
+				resolved: Boolean(t?.resolved ?? t?.isResolved ?? false),
+			}));
+	}
 
 	return { ...result, privileges: userPrivileges };
 };
