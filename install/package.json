@@ -14,7 +14,11 @@
         "lint": "eslint --cache ./nodebb .",
         "test": "nyc --reporter=html --reporter=text-summary mocha",
         "coverage": "nyc report --reporter=text-lcov > ./coverage/lcov.info",
-        "coveralls": "nyc report --reporter=text-lcov | coveralls && rm -r coverage"
+        "coveralls": "nyc report --reporter=text-lcov | coveralls && rm -r coverage",
+        "lint:standard": "standard",
+        "lint:standard:fix": "standard --fix",
+        "lint:standard:report": "mkdir -p tools/standard && standard | tee tools/standard/standard-report.txt || true"
+
     },
     "nyc": {
         "exclude": [
@@ -175,6 +179,26 @@
         "nyc": "17.1.0",
         "smtp-server": "3.13.6"
     },
+    "standard": {
+        "ignore": [
+        "**/node_modules/**",
+        "**/coverage/**",
+        "**/.git/**",
+        "build/**",
+        "public/vendor/**",
+        "public/src/ace/**",
+        "install/**",
+        "**/*.min.js"
+        ],
+        "envs": ["node", "browser", "jquery", "worker", "serviceworker"],
+        "globals": [
+        "app","ajaxify","socket","utils",
+        "config","RELATIVE_PATH",
+        "define","require","requirejs",
+        "$","jQuery","window","document"
+        ]
+    },
+
     "optionalDependencies": {
         "sass-embedded": "1.88.0"
     },
