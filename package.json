@@ -1,0 +1,54 @@
+{
+  "devDependencies": {
+    "@babel/cli": "^7.28.3",
+    "@babel/core": "^7.28.4",
+    "@babel/preset-env": "^7.28.3",
+    "@types/chai": "^5.2.3",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^24.9.1",
+    "chai": "^6.2.0",
+    "fast-fuzz": "^5.1.6",
+    "fast-fuzz-shim": "^1.0.5",
+    "mocha": "^11.7.4",
+    "reflect-metadata": "^0.2.2",
+    "snazzy": "^9.0.0",
+    "standard": "^17.1.2",
+    "ts-mocha": "^11.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "standard": {
+    "ignore": [
+      "**/node_modules/**",
+      "**/coverage/**",
+      "**/.git/**",
+      "build/**",
+      "public/vendor/**",
+      "public/src/ace/**",
+      "install/**",
+      "**/*.min.js"
+    ],
+    "envs": ["node", "browser", "jquery", "worker", "serviceworker"],
+    "globals": [
+      "app", "ajaxify", "socket", "utils", "config",
+      "RELATIVE_PATH", "define", "require", "requirejs",
+      "$", "jQuery", "window", "document"
+    ]
+  },
+
+
+
+
+
+  "dependencies": {
+    "class-transformer": "^0.5.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "fuzz": "fast-fuzz --input . --source src --dist dist --files TopicsFuzzHarness --classes TopicsFuzzHarness --maxTime 5000 --quiet true --force true",
+    "lint:standard": "standard | snazzy",
+    "lint:standard:fix": "standard --fix | snazzy",
+    "lint:standard:report": "mkdir -p tools/standard && standard | tee tools/standard/standard-report.txt || true"
+
+  }
+}
