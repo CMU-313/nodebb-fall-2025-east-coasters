@@ -1,6 +1,12 @@
 [ignore]
+.*/.*  
 
 [include]
+src/
+tests/
+public/
+types/
+
 
 [libs]
 
