@@ -83,7 +83,7 @@ jobs:
         run: mkdir -p /home/runner/work/nodebb-fall-2025-east-coasters/nodebb-fall-2025-east-coasters/logs
 
       # ---- Flow Type Check ----
-      - name: Run Flow type check
+      - name: Run Flow
         run: npm run flow
       # --------------------------
 
