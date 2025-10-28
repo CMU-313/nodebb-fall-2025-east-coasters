@@ -82,16 +82,10 @@ jobs:
       - name: Create logs directory
         run: mkdir -p /home/runner/work/nodebb-fall-2025-east-coasters/nodebb-fall-2025-east-coasters/logs
 
-      - name: Run Flow on changed files
-        run: |
-          CHANGED_FILES=$(git diff --name-only origin/main...HEAD -- '*.js')
-          if [ -n "$CHANGED_FILES" ]; then
-            echo "Running Flow on changed files:"
-            echo "$CHANGED_FILES"
-            npx flow check-contents --respect-pragma false $CHANGED_FILES
-          else
-            echo "No changed JS files to check."
-          fi
+      # ---- Flow Type Check ----
+      - name: Run Flow
+        run: npm run flow
+      # --------------------------
 
       - name: Run ESLint
         run: npm run lint
