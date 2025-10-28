@@ -84,7 +84,7 @@ jobs:
 
       # ---- Flow Type Check ----
       - name: Run Flow type check
-        run: npx flow check --color=always
+        run: npm run flow
       # --------------------------
 
       - name: Run ESLint
