@@ -14,5 +14,6 @@ libdef-override=error
 deprecated-type-bool=error
 
 [options]
+all=true
 
 [strict]
