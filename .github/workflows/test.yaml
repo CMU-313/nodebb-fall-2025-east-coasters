@@ -82,6 +82,11 @@ jobs:
       - name: Create logs directory
         run: mkdir -p /home/runner/work/nodebb-fall-2025-east-coasters/nodebb-fall-2025-east-coasters/logs
 
+      # ---- Flow Type Check ----
+      - name: Run Flow
+        run: npm run flow
+      # --------------------------
+
       - name: Run ESLint
         run: npm run lint
 
