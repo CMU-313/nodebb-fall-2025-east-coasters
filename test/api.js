@@ -692,6 +692,11 @@ describe('API', async () => {
 				return;
 			}
 
+<<<<<<< HEAD
 			assert(schema[prop], `"${prop}" was found in response, but is not defined in schema (path: ${method} ${path}, context: ${context}), SCHEMA ${JSON.stringify(schema)}`);});
+=======
+			assert(schema[prop], `"${prop}" was found in response, but is not defined in schema (path: ${method} ${path}, context: ${context}), SCHEMA ${JSON.stringify(response)}`);
+		});
+>>>>>>> 3199cac60a (perf: updated to sync with bugfix + pass tests)
 	}
 });

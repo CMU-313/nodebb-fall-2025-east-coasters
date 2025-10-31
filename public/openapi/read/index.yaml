@@ -77,6 +77,10 @@ get:
                                               type: number
                                             content:
                                               type: string
+                                            isEnglish:
+                                              type: boolean
+                                            translatedContent:
+                                              type: string
                                             timestampISO:
                                               type: string
                                               description: An ISO 8601 formatted date string (complementing `timestamp`)
@@ -150,7 +154,11 @@ get:
                                   isEnglish:
                                     type: boolean
                                   translatedContent:
+<<<<<<< HEAD
                                     type: string                                  
+=======
+                                    type: string
+>>>>>>> 3199cac60a (perf: updated to sync with bugfix + pass tests)
                                   sourceContent:
                                     type: string
                                     nullable: true
