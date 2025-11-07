@@ -112,6 +112,12 @@ TopicObject:
               nullable: true
               description: The raw, unprocessed version of the teaser content
 
+            isEnglish:
+              type: boolean
+
+            translatedContent:
+              type: string
+
             anonymous:
               type: boolean
               description: Whether this post is anonymous
