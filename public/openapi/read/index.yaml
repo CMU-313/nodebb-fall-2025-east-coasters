@@ -154,11 +154,7 @@ get:
                                   isEnglish:
                                     type: boolean
                                   translatedContent:
-<<<<<<< HEAD
                                     type: string                                  
-=======
-                                    type: string
->>>>>>> 3199cac60a (perf: updated to sync with bugfix + pass tests)
                                   sourceContent:
                                     type: string
                                     nullable: true
