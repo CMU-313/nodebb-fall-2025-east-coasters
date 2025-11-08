@@ -37,6 +37,18 @@ module.exports = function (Categories) {
 
 		for (const key of fields) {
 			// eslint-disable-next-line no-await-in-loop
+			// If the course field is changing, remove old mapping and set new one
+			if (key === 'course') {
+				const oldCourse = await Categories.getCategoryField(cid, 'course');
+				if (oldCourse && oldCourse !== category[key]) {
+					await Categories.removeCourseTag(cid, oldCourse);
+				}
+				if (category[key]) {
+					await Categories.setCourseTag(cid, category[key]);
+				}
+				// persist course via setCourseTag/removeCourseTag handlers above
+				continue;
+			}
 			await updateCategoryField(cid, key, category[key]);
 		}
 

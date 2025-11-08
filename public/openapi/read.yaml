@@ -184,6 +184,8 @@ paths:
     $ref: 'read/admin/groups/groupname/csv.yaml'
   /api/admin/analytics:
     $ref: 'read/admin/analytics.yaml'
+  /api/classes:
+    $ref: 'read/classes.yaml'
   /api/admin/category/uploadpicture:
     $ref: 'read/admin/category/uploadpicture.yaml'
   /api/admin/uploadfavicon:
