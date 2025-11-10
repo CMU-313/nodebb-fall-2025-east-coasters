@@ -13,5 +13,5 @@ translatorApi.translate = async function (postData) {
 const TRANSLATOR_API = "http://128.2.220.234:5000"
 const response = await fetch(TRANSLATOR_API+'/?content='+postData.content);
 const data = await response.json();
-return ['is_english','translated_content'];
+return [data.is_english,data.translated_content];
 };
