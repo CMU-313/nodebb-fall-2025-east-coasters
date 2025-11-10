@@ -8,10 +8,10 @@ translatorApi.translate = function (postData) {
 	return ['is_english',postData];
 };
 
-// translatorApi.translate = async function (postData) {
-//  Edit the translator URL below
-//  const TRANSLATOR_API = "TODO"
-//  const response = await fetch(TRANSLATOR_API+'/?content='+postData.content);
-//  const data = await response.json();
-//  return ['is_english','translated_content'];
-// };
+translatorApi.translate = async function (postData) {
+//  team11: east coasters
+const TRANSLATOR_API = "http://128.2.220.234:5000"
+const response = await fetch(TRANSLATOR_API+'/?content='+postData.content);
+const data = await response.json();
+return ['is_english','translated_content'];
+};
