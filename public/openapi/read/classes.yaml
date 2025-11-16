@@ -1,0 +1,11 @@
+get:
+  tags:
+    - categories
+  summary: Retrieve classes (course categories)
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object

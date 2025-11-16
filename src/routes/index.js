@@ -29,6 +29,11 @@ const _mounts = {
 _mounts.main = (app, middleware, controllers) => {
 	const loginRegisterMiddleware = [middleware.redirectToAccountIfLoggedIn];
 
+	// Add /classes route for landing page
+	setupPageRoute(app, '/classes', [], controllers.classes);
+	// Add /classes/:course route for course-specific categories
+	setupPageRoute(app, '/classes/:course', [], controllers.classesCourse);
+
 	setupPageRoute(app, '/login', loginRegisterMiddleware, controllers.login);
 	setupPageRoute(app, '/register', loginRegisterMiddleware, controllers.register);
 	setupPageRoute(app, '/register/complete', [], controllers.registerInterstitial);

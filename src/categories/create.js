@@ -88,6 +88,11 @@ module.exports = function (Categories) {
 			await Categories.parseDescription(category.cid, category.description);
 		}
 
+		// If a course was provided on create, persist the mapping
+		if (data.course) {
+			await Categories.setCourseTag(category.cid, data.course);
+		}
+
 		await db.sortedSetAddBulk([
 			['categories:cid', category.order, category.cid],
 			[`cid:${parentCid}:children`, category.order, category.cid],
